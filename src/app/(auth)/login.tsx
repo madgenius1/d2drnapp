@@ -5,11 +5,11 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
 } from 'react-native';
 import { HelperText, Text, TextInput } from 'react-native-paper';
 import { Button } from '../../components/ui/Button';
@@ -35,8 +35,8 @@ export default function LoginScreen() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
       return;
     }
 
@@ -63,10 +63,10 @@ export default function LoginScreen() {
       >
         <View style={styles.content}>
           <Text style={[styles.title, { color: colors.text }]}>
-            Welcome to D2D
+            Welcome to d2d App
           </Text>
           <Text style={[styles.subtitle, { color: colors.placeholder }]}>
-            Sign in to continue
+            Log in to continue
           </Text>
 
           <View style={styles.form}>
@@ -110,7 +110,7 @@ export default function LoginScreen() {
               disabled={loading}
               style={styles.button}
             >
-              Sign In
+              Log In
             </Button>
 
             <Button

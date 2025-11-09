@@ -5,11 +5,11 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
 } from 'react-native';
 import { HelperText, Text, TextInput } from 'react-native-paper';
 import { Button } from '../../components/ui/Button';
@@ -78,7 +78,7 @@ export default function RegisterScreen() {
             Create Account
           </Text>
           <Text style={[styles.subtitle, { color: colors.placeholder }]}>
-            Register to get started
+            Sign Up  to get started
           </Text>
 
           <View style={styles.form}>
@@ -141,7 +141,7 @@ export default function RegisterScreen() {
               disabled={loading}
               style={styles.button}
             >
-              Register
+              Sign Up
             </Button>
 
             <Button
@@ -149,7 +149,7 @@ export default function RegisterScreen() {
               onPress={() => router.back()}
               disabled={loading}
             >
-              Already have an account? Sign In
+              Already have an account? Log In
             </Button>
           </View>
         </View>
