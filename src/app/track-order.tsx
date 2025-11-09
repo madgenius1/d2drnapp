@@ -5,10 +5,10 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  View,
 } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
 import { Button } from '../components/ui/Button';
