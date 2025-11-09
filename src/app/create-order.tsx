@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { Divider, Text, TextInput } from 'react-native-paper';
 import { DateTimePicker } from '../components/DateTimePicker';
-import { PriceDisplayModal } from '../components/PriceBreakdownModal';
+import { PriceDisplayModal } from '../components/PriceDisplayModal';
 import { RouteSelector } from '../components/RouteSelector';
 import { StopPicker } from '../components/StopPicker';
 import { Button } from '../components/ui/Button';
@@ -24,6 +24,7 @@ import { useDifferentRoute } from '../hooks/useDifferentRoute';
 import { useRoutes } from '../hooks/useRoutes';
 import { useSameRoute } from '../hooks/useSameRoute';
 import { useTheme } from '../hooks/useTheme';
+import logOrder
 import { logOrderToSheet } from '../services/appsScript';
 import { createOrder } from '../services/firestore';
 import type { PaymentType, Route } from '../types';
