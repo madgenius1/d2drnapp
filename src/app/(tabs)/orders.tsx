@@ -5,10 +5,10 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    FlatList,
-    RefreshControl,
-    StyleSheet,
-    View,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  View,
 } from 'react-native';
 import { Chip, Searchbar, Text } from 'react-native-paper';
 import { OrderCard } from '../../components/OrderCard';

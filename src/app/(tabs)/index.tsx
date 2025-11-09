@@ -41,7 +41,7 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <Text style={[styles.greeting, { color: colors.text }]}>
-          Hello! 👋
+          Hello! 
         </Text>
         <Text style={[styles.subtitle, { color: colors.placeholder }]}>
           Track and manage your deliveries
