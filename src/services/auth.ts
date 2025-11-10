@@ -3,12 +3,12 @@
  */
 
 import {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-    updateProfile,
-    User,
-    UserCredential,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile,
+  User,
+  UserCredential,
 } from 'firebase/auth';
 import { auth } from './firebase';
 import { createUserProfile } from './firestore';
@@ -39,9 +39,9 @@ export const signUp = async (
     await createUserProfile({
       id: user.uid,
       email: user.email || email,
-      displayName: displayName || null,
-      phone: null,
-      photoURL: null,
+      displayName: displayName || undefined,
+      phone: undefined,
+      photoURL: undefined,
       createdAt: Date.now(),
       notificationsEnabled: true,
       emailNotificationsEnabled: true,
