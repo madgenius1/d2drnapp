@@ -15,13 +15,15 @@ import { getFirestore } from 'firebase/firestore';
 
 // TODO: Replace with your Firebase project configuration
 const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_AUTH_DOMAIN',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_STORAGE_BUCKET',
-  messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-  appId: 'YOUR_APP_ID',
+  apiKey: "AIzaSyDDLl8YZM2agfVauR-vg8MrJyANNMBPgI4",
+  authDomain: "d2dapp-a4bad.firebaseapp.com",
+  projectId: "d2dapp-a4bad",
+  storageBucket: "d2dapp-a4bad.firebasestorage.app",
+  messagingSenderId: "230779280017",
+  appId: "1:230779280017:web:1c1c5c093040d09e497d30",
+  measurementId: "G-XPQ8LEY69F"
 };
+
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
@@ -35,7 +37,7 @@ export const db = getFirestore(app);
 // Export types for convenience
 export type { User } from 'firebase/auth';
 export type {
-    CollectionReference, DocumentData,
-    DocumentReference, DocumentSnapshot, QuerySnapshot
+  CollectionReference, DocumentData,
+  DocumentReference, DocumentSnapshot, QuerySnapshot
 } from 'firebase/firestore';
 
