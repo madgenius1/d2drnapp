@@ -1,7 +1,7 @@
 /**
  * Authentication context provider
  */
-
+import type User
 import type { User } from 'firebase/auth';
 import { onAuthStateChanged } from 'firebase/auth';
 import React, { createContext, ReactNode, useEffect, useState } from 'react';

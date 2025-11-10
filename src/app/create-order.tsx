@@ -5,12 +5,12 @@
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
 } from 'react-native';
 import { Divider, Text, TextInput } from 'react-native-paper';
 import { DateTimePicker } from '../components/DateTimePicker';
@@ -24,16 +24,15 @@ import { useDifferentRoute } from '../hooks/useDifferentRoute';
 import { useRoutes } from '../hooks/useRoutes';
 import { useSameRoute } from '../hooks/useSameRoute';
 import { useTheme } from '../hooks/useTheme';
-import logOrder
 import { logOrderToSheet } from '../services/appsScript';
 import { createOrder } from '../services/firestore';
 import type { PaymentType, Route } from '../types';
 import { formatCurrency } from '../utils/formatters';
 import {
-    isFutureDate,
-    isValidDateFormat,
-    isValidKenyanPhone,
-    isValidTimeFormat,
+  isFutureDate,
+  isValidDateFormat,
+  isValidKenyanPhone,
+  isValidTimeFormat,
 } from '../utils/validation';
 
 export default function CreateOrderScreen() {
