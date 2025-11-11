@@ -1,6 +1,7 @@
 /**
  * Route Selector component
  * Updated to use new Route type (name + stops array)
+ * Now with full-width button
  */
 
 import React, { useState } from 'react';
@@ -41,6 +42,7 @@ export const RouteSelector: React.FC<RouteSelectorProps> = ({
       <Menu
         visible={visible}
         onDismiss={closeMenu}
+        contentStyle={styles.menuContent}
         anchor={
           <Button
             mode="outlined"
@@ -48,6 +50,7 @@ export const RouteSelector: React.FC<RouteSelectorProps> = ({
             disabled={disabled}
             style={[styles.button, { borderColor: colors.border }]}
             contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
           >
             {selectedRoute ? selectedRoute.name : 'Choose a route'}
           </Button>
@@ -58,6 +61,7 @@ export const RouteSelector: React.FC<RouteSelectorProps> = ({
             key={route.name}
             onPress={() => handleSelect(route)}
             title={route.name}
+            style={styles.menuItem}
           />
         ))}
       </Menu>
@@ -75,9 +79,21 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   button: {
+    width: '100%',
     justifyContent: 'flex-start',
   },
   buttonContent: {
+    width: '100%',
     justifyContent: 'flex-start',
+  },
+  buttonLabel: {
+    textAlign: 'left',
+  },
+  menuContent: {
+    width: '90%',
+    maxWidth: 400,
+  },
+  menuItem: {
+    maxWidth: '100%',
   },
 });

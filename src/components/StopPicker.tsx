@@ -1,10 +1,10 @@
 /**
  * Stop Picker component
- * Updated to use stop names (no indices displayed)
+ * Now with full-width button
  */
 
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Menu, Text } from 'react-native-paper';
 import { useTheme } from '../hooks/useTheme';
 import type { Route } from '../types';
@@ -45,6 +45,7 @@ export const StopPicker: React.FC<StopPickerProps> = ({
       <Menu
         visible={visible}
         onDismiss={closeMenu}
+        contentStyle={styles.menuContent}
         anchor={
           <Button
             mode="outlined"
@@ -52,18 +53,22 @@ export const StopPicker: React.FC<StopPickerProps> = ({
             disabled={disabled || !route}
             style={[styles.button, { borderColor: colors.border }]}
             contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
           >
             {selectedStopName || 'Choose a stop'}
           </Button>
         }
       >
-        {availableStops.map((stopName) => (
-          <Menu.Item
-            key={stopName}
-            onPress={() => handleSelect(stopName)}
-            title={stopName}
-          />
-        ))}
+        <ScrollView style={styles.menuScroll}>
+          {availableStops.map((stopName) => (
+            <Menu.Item
+              key={stopName}
+              onPress={() => handleSelect(stopName)}
+              title={stopName}
+              style={styles.menuItem}
+            />
+          ))}
+        </ScrollView>
       </Menu>
     </View>
   );
@@ -79,9 +84,25 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   button: {
+    width: '100%',
     justifyContent: 'flex-start',
   },
   buttonContent: {
+    width: '100%',
     justifyContent: 'flex-start',
+  },
+  buttonLabel: {
+    textAlign: 'left',
+  },
+  menuContent: {
+    width: '90%',
+    maxWidth: 400,
+    maxHeight: 300,
+  },
+  menuScroll: {
+    maxHeight: 250,
+  },
+  menuItem: {
+    maxWidth: '100%',
   },
 });
