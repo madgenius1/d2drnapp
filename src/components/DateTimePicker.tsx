@@ -43,7 +43,7 @@ const TIME_LABELS: Record<string, string> = {
   '16:30': '4:30 PM',
 };
 
-export const DateTimePicker: React.FC<DateTimePickerProps> = ({
+export const DateTimePickerComponent: React.FC<DateTimePickerProps> = ({
   date,
   time,
   onDateChange,

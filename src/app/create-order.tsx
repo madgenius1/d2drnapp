@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 import { Divider, Text, TextInput } from 'react-native-paper';
-import { DateTimePicker } from '../components/DateTimePicker';
+import { DateTimePickerComponent } from '../components/DateTimePicker';
 import { PriceDisplayModal } from '../components/PriceDisplayModal';
 import { RouteSelector } from '../components/RouteSelector';
 import { StopPicker } from '../components/StopPicker';
@@ -229,7 +229,7 @@ export default function CreateOrderScreen() {
             label="Pickup Stop"
           />
 
-          <DateTimePicker
+          <DateTimePickerComponent
             date={pickupDate}
             time={pickupTime}
             onDateChange={setPickupDate}
