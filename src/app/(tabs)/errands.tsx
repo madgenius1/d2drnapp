@@ -14,7 +14,7 @@ import {
   View,
 } from 'react-native';
 import { Divider, Text, TextInput } from 'react-native-paper';
-import { DateTimePicker } from '../../components/DateTimePicker';
+import { DateTimePickerComponent } from '../../components/DateTimePicker';
 import { RouteSelector } from '../../components/RouteSelector';
 import { StopPicker } from '../../components/StopPicker';
 import { Button } from '../../components/ui/Button';
@@ -217,7 +217,7 @@ export default function ErrandsScreen() {
             style={styles.input}
           />
 
-          <DateTimePicker
+          <DateTimePickerComponent
             date={errandDate}
             time={errandTime}
             onDateChange={setErrandDate}
