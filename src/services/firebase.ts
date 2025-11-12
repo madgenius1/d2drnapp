@@ -12,6 +12,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 // TODO: Replace with your Firebase project configuration
 const firebaseConfig = {
@@ -24,7 +25,6 @@ const firebaseConfig = {
   measurementId: "G-XPQ8LEY69F"
 };
 
-
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 
@@ -34,10 +34,12 @@ export const auth = getAuth(app);
 // Initialize Cloud Firestore
 export const db = getFirestore(app);
 
+// Initialize Firebase Storage
+export const storage = getStorage(app);
+
 // Export types for convenience
 export type { User } from 'firebase/auth';
 export type {
   CollectionReference, DocumentData,
   DocumentReference, DocumentSnapshot, QuerySnapshot
 } from 'firebase/firestore';
-

@@ -12,6 +12,8 @@ export interface UserProfile {
   notificationsEnabled: boolean;
   emailNotificationsEnabled: boolean;
   smsNotificationsEnabled: boolean;
+  defaultRouteName?: string;
+  defaultStopName?: string;
 }
 
 export interface AuthUser {

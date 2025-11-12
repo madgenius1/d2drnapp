@@ -1,26 +1,35 @@
 /**
  * Profile tab screen
+ * Enhanced with photo upload and default location
  */
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Avatar, Divider, Switch, Text, TextInput } from 'react-native-paper';
+import { RouteSelector } from '../../components/RouteSelector';
+import { StopPicker } from '../../components/StopPicker';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { useAuth } from '../../context/AuthContext';
+import { useRoutes } from '../../hooks/useRoutes';
 import { useTheme } from '../../hooks/useTheme';
 import { updateUserProfile } from '../../services/firestore';
+import { uploadProfilePhoto } from '../../services/storage';
+import type { Route } from '../../types';
 
 export default function ProfileScreen() {
   const { user, userProfile, signOut, refreshProfile } = useAuth();
   const { colors, isDark, toggleTheme } = useTheme();
+  const { routes } = useRoutes();
 
   const [editing, setEditing] = useState(false);
   const [displayName, setDisplayName] = useState(
@@ -28,6 +37,19 @@ export default function ProfileScreen() {
   );
   const [phone, setPhone] = useState(userProfile?.phone || '');
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
+  // Default location state
+  const [editingLocation, setEditingLocation] = useState(false);
+  const [defaultRoute, setDefaultRoute] = useState<Route | null>(() => {
+    if (userProfile?.defaultRouteName) {
+      return routes.find(r => r.name === userProfile.defaultRouteName) || null;
+    }
+    return null;
+  });
+  const [defaultStopName, setDefaultStopName] = useState<string | null>(
+    userProfile?.defaultStopName || null
+  );
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     userProfile?.notificationsEnabled ?? true
@@ -46,8 +68,8 @@ export default function ProfileScreen() {
       setSaving(true);
 
       await updateUserProfile(user.uid, {
-        displayName: displayName.trim() || null,
-        phone: phone.trim() || null,
+        displayName: displayName.trim() || undefined,
+        phone: phone.trim() || undefined,
         notificationsEnabled,
         emailNotificationsEnabled: emailNotifications,
         smsNotificationsEnabled: smsNotifications,
@@ -61,6 +83,71 @@ export default function ProfileScreen() {
       Alert.alert('Error', 'Failed to update profile. Please try again.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveLocation = async () => {
+    if (!user) return;
+
+    try {
+      setSaving(true);
+
+      await updateUserProfile(user.uid, {
+        defaultRouteName: defaultRoute?.name || undefined,
+        defaultStopName: defaultStopName || undefined,
+      });
+
+      await refreshProfile();
+      setEditingLocation(false);
+      Alert.alert('Success', 'Default location saved!');
+    } catch (error) {
+      console.error('Error saving location:', error);
+      Alert.alert('Error', 'Failed to save location. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePickImage = async () => {
+    try {
+      // Request permission
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Required',
+          'Please allow access to your photo library to upload a profile picture.'
+        );
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
+
+      if (!result.canceled && result.assets[0] && user) {
+        setUploadingPhoto(true);
+
+        // Upload to Firebase Storage
+        const photoURL = await uploadProfilePhoto(user.uid, result.assets[0].uri);
+
+        // Update Firestore profile
+        await updateUserProfile(user.uid, { photoURL });
+
+        // Refresh profile to show new photo
+        await refreshProfile();
+
+        Alert.alert('Success', 'Profile photo updated!');
+      }
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      Alert.alert('Error', 'Failed to upload photo. Please try again.');
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
@@ -82,13 +169,11 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const handleAvatarPress = () => {
-    // TODO: Implement avatar upload
-    Alert.alert(
-      'Avatar Upload',
-      'Avatar upload feature coming soon!',
-      [{ text: 'OK' }]
-    );
+  const getInitials = () => {
+    if (displayName) {
+      return displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    return 'U';
   };
 
   return (
@@ -98,21 +183,32 @@ export default function ProfileScreen() {
     >
       {/* Profile Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleAvatarPress}>
-          <Avatar.Text
-            size={80}
-            label={displayName ? displayName[0].toUpperCase() : 'U'}
-            style={{ backgroundColor: colors.primary }}
-          />
+        <TouchableOpacity onPress={handlePickImage} disabled={uploadingPhoto}>
+          {userProfile?.photoURL ? (
+            <Image
+              source={{ uri: userProfile.photoURL }}
+              style={styles.avatarImage}
+            />
+          ) : (
+            <Avatar.Text
+              size={80}
+              label={getInitials()}
+              style={{ backgroundColor: colors.primary }}
+            />
+          )}
           <View
             style={[styles.avatarBadge, { backgroundColor: colors.primary }]}
           >
-            <MaterialCommunityIcons name="camera" size={16} color="#fff" />
+            <MaterialCommunityIcons 
+              name={uploadingPhoto ? "loading" : "camera"} 
+              size={16} 
+              color="#fff" 
+            />
           </View>
         </TouchableOpacity>
 
         <Text style={[styles.name, { color: colors.text }]}>
-          {displayName || 'User'}
+          {displayName || userProfile?.email || 'User'}
         </Text>
         <Text style={[styles.email, { color: colors.placeholder }]}>
           {user?.email}
@@ -190,6 +286,90 @@ export default function ProfileScreen() {
             <InfoRow
               label="Phone"
               value={phone || 'Not set'}
+              colors={colors}
+            />
+          </>
+        )}
+      </Card>
+
+      {/* Default Location */}
+      <Card style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>
+            Default Location
+          </Text>
+          {!editingLocation && (
+            <Button
+              variant="text"
+              onPress={() => setEditingLocation(true)}
+              compact
+            >
+              Edit
+            </Button>
+          )}
+        </View>
+
+        <Divider style={styles.divider} />
+
+        <Text style={[styles.helpText, { color: colors.placeholder }]}>
+          Set your most frequently used pickup location for faster order creation
+        </Text>
+
+        {editingLocation ? (
+          <>
+            <RouteSelector
+              routes={routes}
+              selectedRoute={defaultRoute}
+              onSelect={(route) => {
+                setDefaultRoute(route);
+                setDefaultStopName(null);
+              }}
+              label="Default Route"
+            />
+
+            <StopPicker
+              route={defaultRoute}
+              selectedStopName={defaultStopName}
+              onSelect={setDefaultStopName}
+              label="Default Stop"
+            />
+
+            <View style={styles.editActions}>
+              <Button
+                onPress={handleSaveLocation}
+                loading={saving}
+                disabled={saving || !defaultRoute || !defaultStopName}
+                style={styles.saveButton}
+              >
+                Save Location
+              </Button>
+              <Button
+                variant="outlined"
+                onPress={() => {
+                  setEditingLocation(false);
+                  setDefaultRoute(
+                    userProfile?.defaultRouteName
+                      ? routes.find(r => r.name === userProfile.defaultRouteName) || null
+                      : null
+                  );
+                  setDefaultStopName(userProfile?.defaultStopName || null);
+                }}
+                disabled={saving}
+              >
+                Cancel
+              </Button>
+            </View>
+          </>
+        ) : (
+          <>
+            <InfoRow
+              label="Route"
+              value={userProfile?.defaultRouteName || 'Not set'}
+              colors={colors}
+            />
+            <InfoRow
+              label="Stop"
+              value={userProfile?.defaultStopName || 'Not set'}
               colors={colors}
             />
           </>
@@ -274,7 +454,7 @@ export default function ProfileScreen() {
       </Button>
 
       <Text style={[styles.version, { color: colors.placeholder }]}>
-        Version 1.0.0
+        Version 2.0.0
       </Text>
     </ScrollView>
   );
@@ -330,6 +510,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
+  avatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
   avatarBadge: {
     position: 'absolute',
     bottom: 0,
@@ -367,6 +552,11 @@ const styles = StyleSheet.create({
   },
   divider: {
     marginBottom: 12,
+  },
+  helpText: {
+    fontSize: 12,
+    marginBottom: 16,
+    lineHeight: 18,
   },
   input: {
     marginBottom: 16,
