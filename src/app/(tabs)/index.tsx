@@ -15,7 +15,7 @@ import { useOrders } from '../../hooks/useOrders';
 import { useTheme } from '../../hooks/useTheme';
 
 export default function HomeScreen() {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const { colors } = useTheme();
   const router = useRouter();
   const { orders, loading } = useOrders({ userId: user?.uid || null });
@@ -41,7 +41,7 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <Text style={[styles.greeting, { color: colors.text }]}>
-          Hello! 
+          Hello, {userProfile?.displayName || 'there'}! 👋
         </Text>
         <Text style={[styles.subtitle, { color: colors.placeholder }]}>
           Track and manage your deliveries
