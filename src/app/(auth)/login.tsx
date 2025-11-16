@@ -1,5 +1,5 @@
 /**
- * Login screen
+ * Login Screen
  */
 
 import { useRouter } from 'expo-router';
@@ -18,32 +18,39 @@ import { signIn } from '../../services/auth';
 import { isValidEmail } from '../../utils/validation';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const router = useRouter();
+  const { colors } = useTheme();
+
+  const [form, setForm] = useState({
+    email: '',
+    password: '',
+    showPassword: false,
+  });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
 
-  const { colors } = useTheme();
-  const router = useRouter();
+  const updateField = (key: keyof typeof form, value: string | boolean) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleLogin = async () => {
     setError('');
 
-    if (!isValidEmail(email)) {
+    if (!isValidEmail(form.email)) {
       setError('Please enter a valid email address');
       return;
     }
 
-    if (password.length < 8) {
+    if (form.password.length < 8) {
       setError('Password must be at least 8 characters');
       return;
     }
 
     try {
       setLoading(true);
-      await signIn(email, password);
-      // Navigation handled by RootLayoutNav
+      await signIn(form.email, form.password);
+      // router.replace('/dashboard'); // Optional redirect
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Failed to sign in');
@@ -54,7 +61,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <ScrollView
@@ -62,57 +69,85 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
+          {/* Title */}
           <Text style={[styles.title, { color: colors.text }]}>
-            Welcome to d2d App
+            Welcome Back!
           </Text>
           <Text style={[styles.subtitle, { color: colors.placeholder }]}>
-            Log in to continue
+            Sign in to access your delivery dashboard.
           </Text>
 
           <View style={styles.form}>
+            {/* Email Field */}
             <TextInput
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
+              label="Email Address"
+              value={form.email}
+              onChangeText={(v) => updateField('email', v)}
               mode="outlined"
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
               style={styles.input}
+              outlineStyle={{ borderRadius: 12 }}
+              left={<TextInput.Icon icon="email-outline" />}
             />
 
+            {/* Password Field */}
             <TextInput
               label="Password"
-              value={password}
-              onChangeText={setPassword}
+              value={form.password}
+              onChangeText={(v) => updateField('password', v)}
               mode="outlined"
-              secureTextEntry={!showPassword}
+              secureTextEntry={!form.showPassword}
               autoCapitalize="none"
               autoComplete="password"
+              style={styles.input}
+              outlineStyle={{ borderRadius: 12 }}
+              left={<TextInput.Icon icon="lock-outline" />}
               right={
                 <TextInput.Icon
-                  icon={showPassword ? 'eye-off' : 'eye'}
-                  onPress={() => setShowPassword(!showPassword)}
+                  icon={form.showPassword ? 'eye-off' : 'eye'}
+                  onPress={() => updateField('showPassword', !form.showPassword)}
                 />
               }
-              style={styles.input}
             />
 
-            {error ? (
-              <HelperText type="error" visible={true}>
+            {/* Forgot Password */}
+            <View style={styles.forgotPasswordContainer}>
+              <Button
+                variant="text"
+                onPress={() => router.push('/(auth)/forgot-password')}
+                disabled={loading}
+                contentStyle={styles.forgotPasswordButtonContent}
+                labelStyle={{ color: colors.primary, fontWeight: '600' }}
+              >
+                Forgot Password?
+              </Button>
+            </View>
+
+            {/* Error */}
+            {!!error && (
+              <HelperText
+                type="error"
+                visible
+                style={styles.errorText}
+              >
                 {error}
               </HelperText>
-            ) : null}
+            )}
 
+            {/* Login Button */}
             <Button
               onPress={handleLogin}
               loading={loading}
               disabled={loading}
               style={styles.button}
+              mode="contained"
             >
               Log In
             </Button>
 
+            {/* Register Link */}
             <Button
               variant="text"
               onPress={() => router.push('/(auth)/register')}
@@ -128,35 +163,43 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  content: {
-    padding: 24,
-  },
+  container: { flex: 1 },
+  scrollContent: { flexGrow: 1, justifyContent: 'center' },
+  content: { padding: 24 },
   title: {
     fontSize: 32,
     fontWeight: '700',
     marginBottom: 8,
     textAlign: 'center',
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
-    marginBottom: 32,
+    fontSize: 15,
+    marginBottom: 36,
     textAlign: 'center',
   },
-  form: {
-    marginTop: 16,
-  },
+  form: { marginTop: 16 },
   input: {
     marginBottom: 16,
+    marginTop: 12,
   },
   button: {
-    marginTop: 8,
+    marginTop: 16,
     marginBottom: 16,
+    borderRadius: 12,
+    paddingVertical: 10,
+  },
+  forgotPasswordContainer: {
+    alignItems: 'flex-end',
+    marginTop: -8,
+    marginBottom: 12,
+  },
+  forgotPasswordButtonContent: {
+    paddingHorizontal: 0,
+    paddingVertical: 4,
+  },
+  errorText: {
+    textAlign: 'center',
+    marginBottom: 8,
   },
 });
