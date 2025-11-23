@@ -1,8 +1,0 @@
-{
-  "firestore": {
-    "database": "(default)",
-    "indexes": "firestore.indexes.json",
-    "location": "eur3",
-    "rules": "firestore.rules"
-  }
-}
