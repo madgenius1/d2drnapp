@@ -6,9 +6,9 @@ import { router } from "expo-router";
 import { Mail, Lock } from "lucide-react-native";
 import { useTheme } from "../../theme/index";
 import { useAuthStore } from "../../store/index";
-import Button from "../../components/Button";
-import Input from "../../components/Input";
-import KeyboardAvoidingAnimatedView from "../../components/KeyboardAvoidingAnimatedView";
+import Button from "@/components/common/Button";
+import Input from "@/components/common/Button";
+import KeyboardAvoidingAnimatedView from "@/components/common/KeyboardAvoidingAnimatedView";
 
 export default function LoginScreen() {
   const theme = useTheme();

@@ -13,16 +13,16 @@ import { format } from 'date-fns';
 import { useTheme } from '../theme';
 import { usePriceBreakdown } from '../hooks/pricing/usePriceBreakdown';
 import { useLocationValidation } from '../hooks/routes/useLocationValidation';
-import { validateOrderForm, isOrderFormComplete } from '../utils/validation/orderValidation';
+import { validateOrderForm, isOrderFormComplete } from '@/utils/validation/orderValidation';
 import { CreateOrderFormData } from '../types/models/Order';
 import { getPickupTimeOptions } from '../data/constants/pickupTimes';
-import Button from '../components/Button';
-import Dropdown from '../components/Dropdown';
+import Button from '@/components/common/Button';
+import Dropdown from '@/components/common/Dropdown';
 import RecipientDetailsForm from '../components/order/RecipientDetailsForm';
 import ItemDetailsForm from '../components/order/ItemDetailsForm';
-import DeliveryInstructionsForm from '../components/order/DeliveryInstructionsForm';
+import DeliveryInstructionsForm from '@/components/order/DeliveryInstrucionsForm';
 import PriceBreakdownComponent from '../components/order/PriceBreakdown';
-import KeyboardAvoidingAnimatedView from '../components/KeyboardAvoidingAnimatedView';
+import KeyboardAvoidingAnimatedView from '@/components/common/KeyboardAvoidingAnimatedView';
 
 export default function CreateOrderScreen() {
   const theme = useTheme();

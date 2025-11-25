@@ -6,16 +6,16 @@ import { useLocalSearchParams, router } from "expo-router";
 import { MessageSquare, MapPin, Clock, FileText } from "lucide-react-native";
 import { useTheme } from "../../theme/index";
 import { useAppStore } from "../../store/index";
-import Button from "../../components/Button";
-import Input from "../../components/Input";
-import Dropdown from "../../components/Dropdown";
-import KeyboardAvoidingAnimatedView from "../../components/KeyboardAvoidingAnimatedView";
+import Button from "@/components/common/Button";
+import Input from "@/components/common/Input";
+import Dropdown from "@/components/common/Dropdown";
+import KeyboardAvoidingAnimatedView from "@/components/common/KeyboardAvoidingAnimatedView";
 
 const TIME_OPTIONS = [
   { id: "now", name: "As soon as possible" },
-  { id: "morning", name: "8:00 AM - 12:00 PM" },
-  { id: "afternoon", name: "12:00 PM - 5:00 PM" },
-  { id: "evening", name: "5:00 PM - 8:00 PM" },
+  { id: "morning", name: "8:00 AM - 11:00 PM" },
+  { id: "afternoon", name: "12:00 PM - 3:00 PM" },
+  { id: "evening", name: "3:00 PM - 6:00 PM" },
 ];
 
 export default function ErrandsScreen() {

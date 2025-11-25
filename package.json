@@ -12,11 +12,13 @@
     "dev": "APP_VARIANT=development npx expo start"
   },
   "dependencies": {
+    "@expo-google-fonts/quicksand": "^0.4.1",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-community/datetimepicker": "^8.5.0",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
+    "@tanstack/react-query": "^5.90.10",
     "date-fns": "^4.1.0",
     "expo": "~54.0.23",
     "expo-constants": "~18.0.10",

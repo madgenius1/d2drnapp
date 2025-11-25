@@ -18,9 +18,9 @@ import {
 } from "lucide-react-native";
 import { useTheme } from "../../theme/index";
 import { useAppStore } from "../../store/index";
-import Button from "../../components/Button";
-import Card from "../../components/Card";
-import Input from "../../components/Input";
+import Button from "@/components/common/Button";
+import Input from "@/components/common/Input";
+import Card from "@/components/common/Card";
 
 export default function HomeScreen() {
   const theme = useTheme();

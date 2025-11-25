@@ -13,7 +13,7 @@ import { Package, Clock, CheckCircle2, Filter } from "lucide-react-native";
 import { format } from "date-fns";
 import { useTheme } from "../../theme/index";
 import { useAppStore } from "../../store/index";
-import Card from "../../components/Card";
+import Card from "@/components/common/Card";
 
 const statusConfig = {
   created: { color: "#099d15", label: "Created" },

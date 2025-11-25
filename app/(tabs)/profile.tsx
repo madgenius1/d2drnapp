@@ -24,8 +24,8 @@ import {
 } from "lucide-react-native";
 import { useTheme } from "../../theme/index";
 import { useAuthStore } from "../../store/index";
-import Button from "../../components/Button";
-import Card from "../../components/Card";
+import Button from "@/components/common/Button";
+import Card from "@/components/common/Card";
 
 export default function ProfileScreen() {
   const theme = useTheme();

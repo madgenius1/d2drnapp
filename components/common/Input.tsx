@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, TextInput, Text, TouchableOpacity } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
-import { useTheme } from "../theme/index";
+import { useTheme } from "@/theme";
 
 export default function Input({
   label,
