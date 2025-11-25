@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
-import { useTheme } from "../theme/index";
+import { useTheme } from "@/theme";
 
 export default function Card({
   children,
