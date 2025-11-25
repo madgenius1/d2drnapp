@@ -18,8 +18,8 @@ import {
 } from 'lucide-react-native';
 import { useTheme } from '../theme';
 import { formatPrice } from '../utils/formatting/priceFormatter';
-import Card from '../components/Card';
-import Button from '../components/Button';
+import Card from '@/components/common/Card';
+import Button from '@/components/common/Button';
 import PhoneInput from '../components/forms/PhoneInput';
 
 export default function PaymentScreen() {

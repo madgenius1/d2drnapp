@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from 'react';
 import { Platform, Keyboard, KeyboardAvoidingView } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-const KeyboardAvoidingAnimatedView = (props, ref) => {
+const KeyboardAvoidingAnimatedView = () => {
   const {
     children,
     behavior = Platform.OS === 'ios' ? 'padding' : 'height',

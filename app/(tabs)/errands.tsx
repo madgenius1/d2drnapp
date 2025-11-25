@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useLocalSearchParams, router } from "expo-router";
-import { MessageSquare, MapPin, Clock, FileText } from "lucide-react-native";
+import { MessageSquare, FileText } from "lucide-react-native";
 import { useTheme } from "../../theme/index";
 import { useAppStore } from "../../store/index";
 import Button from "@/components/common/Button";

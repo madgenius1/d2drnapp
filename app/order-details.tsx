@@ -29,8 +29,8 @@ import { Order, OrderStatus } from '../types/models/Order';
 import { formatDateTime, formatTime } from '../utils/formatting/dateFormatter';
 import { formatPrice } from '../utils/formatting/priceFormatter';
 import { formatPhoneForDisplay, formatPhoneForCall } from '../utils/formatting/phoneFormatter';
-import Card from '../components/Card';
-import Button from '../components/Button';
+import Card from '@/components/common/Card';
+import Button from '@/components/common/Button';
 import OrderStatusBadge from '../components/order/OrderStatusBadge';
 import ProgressTimeline from '../components/order/ProgressTimeline';
 

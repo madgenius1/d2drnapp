@@ -6,7 +6,7 @@ import { router } from "expo-router";
 import { Package, MapPin, CheckCircle } from "lucide-react-native";
 import { useTheme } from "../theme/index";
 import { useAppStore } from "../store/index";
-import Button from "../components/Button";
+import Button from "@/components/common/Button";
 
 const { width: screenWidth } = Dimensions.get("window");
 

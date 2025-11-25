@@ -12,13 +12,13 @@ import { ArrowLeft, Save, AlertTriangle } from 'lucide-react-native';
 import { useTheme } from '../theme';
 import { useOrderStore } from '../store';
 import { Order, OrderStatus } from '../types/models/Order';
-import { validateOrderForm } from '../utils/validation/orderValidation';
-import Button from '../components/Button';
+import { validateOrderForm } from '@/utils/validation/orderValidation';
+import Button from '@/components/common/Button';
 import RecipientDetailsForm from '../components/order/RecipientDetailsForm';
 import ItemDetailsForm from '../components/order/ItemDetailsForm';
-import DeliveryInstructionsForm from '../components/order/DeliveryInstructionsForm';
-import Card from '../components/Card';
-import KeyboardAvoidingAnimatedView from '../components/KeyboardAvoidingAnimatedView';
+import DeliveryInstructionsForm from '@/components/order/DeliveryInstrucionsForm';
+import Card from '@/components/common/Card';
+import KeyboardAvoidingAnimatedView from '@/components/common/KeyboardAvoidingAnimatedView';
 
 export default function EditOrderScreen() {
   const theme = useTheme();
