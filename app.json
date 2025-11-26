@@ -9,8 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.nickjuma.d2dapp"
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
@@ -20,8 +19,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.nickjuma.d2dapp"
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
@@ -40,25 +38,11 @@
             "backgroundColor": "#000000"
           }
         }
-      ],
-      "expo-font"
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "6c583cbf-194b-4236-b73c-805aee132e93"
-      }
-    },
-    "owner": "nickjuma",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/6c583cbf-194b-4236-b73c-805aee132e93"
     }
   }
 }
