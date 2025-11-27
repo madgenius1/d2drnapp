@@ -3,6 +3,7 @@
  * Edit order details (only for scheduled orders)
  */
 
+import KeyboardAvoidingAnimatedView from '@/components/KeyboardAvoidingAnimatedView';
 import { format } from 'date-fns';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -15,7 +16,6 @@ import Dropdown from '../../components/common/Dropdown';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import Input from '../../components/common/Input';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import KeyboardAvoidingAnimatedView from '../../components/KeyboardAvoidingAnimatedView';
 import RecipientForm from '../../components/order/RecipientForm';
 import { PICKUP_TIME_OPTIONS } from '../../data/pickupTimes';
 import { useOrders } from '../../hooks/useOrders';

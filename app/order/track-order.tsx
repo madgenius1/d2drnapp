@@ -3,6 +3,7 @@
  * Real-time order tracking by ID
  */
 
+import KeyboardAvoidingAnimatedView from '@/components/KeyboardAvoidingAnimatedView';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ArrowLeft, MapPin, Search } from 'lucide-react-native';
@@ -14,7 +15,6 @@ import Card from '../../components/common/Card';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import Input from '../../components/common/Input';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import KeyboardAvoidingAnimatedView from '../../components/KeyboardAvoidingAnimatedView';
 import OrderTimeline from '../../components/order/OrderTimeline';
 import { useOrders } from '../../hooks/useOrders';
 import { useTheme } from '../../theme';

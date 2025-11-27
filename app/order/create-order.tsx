@@ -3,6 +3,7 @@
  * Complete order creation with recipient details, payment, and fragile toggle
  */
 
+import KeyboardAvoidingAnimatedView from '@/components/KeyboardAvoidingAnimatedView';
 import { format } from 'date-fns';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -13,7 +14,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Button from '../../components/common/Button';
 import Dropdown from '../../components/common/Dropdown';
 import Input from '../../components/common/Input';
-import KeyboardAvoidingAnimatedView from '../../components/KeyboardAvoidingAnimatedView';
 import PaymentSelector from '../../components/order/PaymentSelector';
 import PriceBreakdown from '../../components/order/PriceBreakdown';
 import RecipientForm from '../../components/order/RecipientForm';
