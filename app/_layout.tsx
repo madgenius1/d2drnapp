@@ -2,23 +2,23 @@
  * Root Layout with Enhanced Auth Persistence
  */
 
-import React, { useEffect, useState } from "react";
-import { Stack, useRouter, useSegments } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  useFonts,
   Quicksand_300Light,
   Quicksand_400Regular,
   Quicksand_500Medium,
   Quicksand_600SemiBold,
   Quicksand_700Bold,
+  useFonts,
 } from "@expo-google-fonts/quicksand";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { View, ActivityIndicator } from "react-native";
-import { useTheme } from "../theme/index";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../theme/index";
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -28,7 +28,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-      cacheTime: 1000 * 60 * 30, // 30 minutes
+      gcTime: 1000 * 60 * 30, // 30 minutes
       retry: 1,
       refetchOnWindowFocus: false,
     },
