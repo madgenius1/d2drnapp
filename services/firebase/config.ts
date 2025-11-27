@@ -6,14 +6,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FirebaseApp, getApp, getApps, initializeApp } from 'firebase/app';
 import {
-    Auth,
-    getAuth,
-    getReactNativePersistence,
-    initializeAuth
+  Auth, getAuth,
+  // @ts-ignore
+  getReactNativePersistence,
+  initializeAuth
 } from 'firebase/auth';
-import { Firestore, getFirestore } from 'firebase/firestore';
+import { doc, Firestore, getDoc, getFirestore } from 'firebase/firestore';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
 import { env, validateEnv } from '../../config/env';
+
+
 
 // Validate environment variables
 const envValidation = validateEnv();
@@ -121,9 +123,8 @@ export const getFirebaseStorage = (): FirebaseStorage => {
 // Health check function
 export const checkFirebaseConnection = async (): Promise<boolean> => {
   try {
-    // Simple check: try to access Firestore
-    const testDoc = firestore.collection('_health').doc('test');
-    await testDoc.get();
+    const testDocRef = doc(firestore, '_health', 'test');
+    await getDoc(testDocRef);
     return true;
   } catch (error) {
     console.error('[Firebase] Connection check failed:', error);
