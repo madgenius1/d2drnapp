@@ -186,13 +186,13 @@ export const formatDuration = (seconds: number): string => {
 /**
  * Format distance (meters to human readable)
  */
-export const formatDistance = (meters: number): string => {
-  if (meters < 1000) {
-    return `${Math.round(meters)}m`;
-  }
+// export const formatDistance = (meters: number): string => {
+//   if (meters < 1000) {
+//     return `${Math.round(meters)}m`;
+//   }
 
-  return `${(meters / 1000).toFixed(1)}km`;
-};
+//   return `${(meters / 1000).toFixed(1)}km`;
+// };
 
 /**
  * Parse ISO date string to Date object safely
