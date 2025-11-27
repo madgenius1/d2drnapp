@@ -5,8 +5,10 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FirebaseApp, getApp, getApps, initializeApp } from 'firebase/app';
+
 import {
-  Auth, getAuth,
+  Auth,
+  getAuth,
   // @ts-ignore
   getReactNativePersistence,
   initializeAuth
@@ -14,8 +16,6 @@ import {
 import { doc, Firestore, getDoc, getFirestore } from 'firebase/firestore';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
 import { env, validateEnv } from '../../config/env';
-
-
 
 // Validate environment variables
 const envValidation = validateEnv();

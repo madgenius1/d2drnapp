@@ -26,9 +26,9 @@ interface OnboardingStep {
 const onboardingData: OnboardingStep[] = [
   {
     id: 1,
-    title: 'What is D2D?',
+    title: 'What is the d2dApp?',
     description:
-      'D2D is your reliable partner for pick-up, drop-off, and errand services. We make deliveries simple and affordable.',
+      'd2dApp is your reliable partner for pick-up, drop-off, and errand services. We make deliveries simple, better, and affordable.',
     icon: Package,
     color: '#099d15',
   },
@@ -36,15 +36,15 @@ const onboardingData: OnboardingStep[] = [
     id: 2,
     title: 'How It Works',
     description:
-      'Select your pickup and drop-off locations from our route network. Track your delivery in real-time from start to finish.',
+      'Select your pickup and drop-off locations from our route network. Track your delivery from start to finish.',
     icon: MapPin,
     color: '#1485FF',
   },
   {
     id: 3,
-    title: 'Why Choose D2D?',
+    title: 'Why Choose the d2dApp?',
     description:
-      'Fast, affordable, and transparent pricing. No hidden fees, reliable service, and friendly drivers.',
+      'Fast, affordable, and transparent pricing. No hidden fees, reliable service, and more convinience.',
     icon: CheckCircle,
     color: '#22C75A',
   },
