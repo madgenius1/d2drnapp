@@ -1,0 +1,138 @@
+/**
+ * Keyboard Avoiding Animated View (TypeScript)
+ * Handles keyboard appearance with smooth animations
+ */
+
+import React, { forwardRef, useEffect, useRef } from 'react';
+import { Keyboard, KeyboardAvoidingView, LayoutChangeEvent, Platform, ViewStyle } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+
+interface KeyboardAvoidingAnimatedViewProps {
+  children: React.ReactNode;
+  behavior?: 'height' | 'position' | 'padding';
+  keyboardVerticalOffset?: number;
+  style?: ViewStyle;
+  contentContainerStyle?: ViewStyle;
+  enabled?: boolean;
+  onLayout?: (event: LayoutChangeEvent) => void;
+}
+
+const KeyboardAvoidingAnimatedView = forwardRef<any, KeyboardAvoidingAnimatedViewProps>((props, ref) => {
+  const {
+    children,
+    behavior = Platform.OS === 'ios' ? 'padding' : 'height',
+    keyboardVerticalOffset = 0,
+    style,
+    contentContainerStyle,
+    enabled = true,
+    onLayout,
+  } = props;
+
+  const animatedViewRef = useRef<any>(null);
+  const initialHeightRef = useRef(0);
+  const bottomRef = useRef(0);
+  const bottomHeight = useSharedValue(0);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const onKeyboardShow = (event: any) => {
+      const { duration, endCoordinates } = event;
+      const animatedView = animatedViewRef.current;
+
+      if (!animatedView) return;
+
+      let height = 0;
+
+      const keyboardY = endCoordinates.screenY - keyboardVerticalOffset;
+      height = Math.max(animatedView.y + animatedView.height - keyboardY, 0);
+
+      bottomHeight.value = withTiming(height, {
+        duration: duration > 10 ? duration : 300,
+      });
+      bottomRef.current = height;
+    };
+
+    const onKeyboardHide = () => {
+      bottomHeight.value = withTiming(0, { duration: 300 });
+      bottomRef.current = 0;
+    };
+
+    const showSubscription = Keyboard.addListener('keyboardWillShow', onKeyboardShow);
+    const hideSubscription = Keyboard.addListener('keyboardWillHide', onKeyboardHide);
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, [keyboardVerticalOffset, enabled, bottomHeight]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    if (behavior === 'height') {
+      return {
+        height: initialHeightRef.current - bottomHeight.value,
+        flex: bottomHeight.value > 0 ? 0 : undefined,
+      };
+    }
+    if (behavior === 'padding') {
+      return {
+        paddingBottom: bottomHeight.value,
+      };
+    }
+    return {};
+  });
+
+  const positionAnimatedStyle = useAnimatedStyle(() => ({
+    bottom: bottomHeight.value,
+  }));
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const layout = event.nativeEvent.layout;
+    animatedViewRef.current = layout;
+
+    if (!initialHeightRef.current) {
+      initialHeightRef.current = layout.height;
+    }
+
+    if (onLayout) {
+      onLayout(event);
+    }
+  };
+
+  const renderContent = () => {
+    if (behavior === 'position') {
+      return (
+        <Animated.View style={[contentContainerStyle, positionAnimatedStyle]}>
+          {children}
+        </Animated.View>
+      );
+    }
+    return children;
+  };
+
+  if (Platform.OS === 'web') {
+    return (
+      <KeyboardAvoidingView
+        behavior={behavior}
+        style={style}
+        contentContainerStyle={contentContainerStyle}
+      >
+        {children}
+      </KeyboardAvoidingView>
+    );
+  }
+
+  return (
+    <Animated.View
+      ref={ref}
+      style={[style, animatedStyle]}
+      onLayout={handleLayout}
+    >
+      {renderContent()}
+    </Animated.View>
+  );
+});
+
+KeyboardAvoidingAnimatedView.displayName = 'KeyboardAvoidingAnimatedView';
+
+export default KeyboardAvoidingAnimatedView;

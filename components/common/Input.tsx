@@ -1,7 +1,28 @@
-import { Eye, EyeOff } from "lucide-react-native";
-import React, { useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
-import { useTheme } from "../theme/index";
+/**
+ * Input Component (TypeScript)
+ * Text input with icons and validation
+ */
+
+import { Eye, EyeOff, LucideIcon } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { Text, TextInput, TextInputProps, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { useTheme } from '../../theme';
+
+interface InputProps extends TextInputProps {
+  label?: string;
+  placeholder?: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  error?: string;
+  secureTextEntry?: boolean;
+  multiline?: boolean;
+  numberOfLines?: number;
+  leftIcon?: LucideIcon;
+  rightIcon?: LucideIcon;
+  style?: ViewStyle;
+  inputStyle?: TextStyle;
+  disabled?: boolean;
+}
 
 export default function Input({
   label,
@@ -18,14 +39,14 @@ export default function Input({
   inputStyle = {},
   disabled = false,
   ...props
-}) {
+}: InputProps) {
   const theme = useTheme();
   const [isSecure, setIsSecure] = useState(secureTextEntry);
   const [isFocused, setIsFocused] = useState(false);
 
-  const getInputContainerStyle = () => ({
-    flexDirection: "row",
-    alignItems: multiline ? "flex-start" : "center",
+  const getInputContainerStyle = (): ViewStyle => ({
+    flexDirection: 'row',
+    alignItems: multiline ? 'flex-start' : 'center',
     backgroundColor: theme.colors.input.background,
     borderWidth: 1,
     borderColor: error
@@ -39,15 +60,15 @@ export default function Input({
     opacity: disabled ? 0.6 : 1,
   });
 
-  const getInputStyle = () => ({
+  const getInputStyle = (): TextStyle => ({
     flex: 1,
     fontSize: 16,
-    fontFamily: "Quicksand-Regular",
+    fontFamily: 'Quicksand-Regular',
     color: theme.colors.text.primary,
     paddingLeft: LeftIcon ? 12 : 0,
     paddingRight: RightIcon || secureTextEntry ? 12 : 0,
     minHeight: multiline ? numberOfLines * 20 : undefined,
-    textAlignVertical: multiline ? "top" : "center",
+    textAlignVertical: multiline ? 'top' : 'center',
     ...inputStyle,
   });
 
@@ -57,7 +78,7 @@ export default function Input({
         <Text
           style={{
             fontSize: 16,
-            fontFamily: "Quicksand-Medium",
+            fontFamily: 'Quicksand-Medium',
             color: theme.colors.text.primary,
             marginBottom: 8,
           }}
@@ -106,7 +127,7 @@ export default function Input({
         <Text
           style={{
             fontSize: 14,
-            fontFamily: "Quicksand-Regular",
+            fontFamily: 'Quicksand-Regular',
             color: theme.colors.error,
             marginTop: 4,
           }}

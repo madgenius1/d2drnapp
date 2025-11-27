@@ -1,11 +1,29 @@
-import { Check, ChevronDown } from "lucide-react-native";
-import React, { useState } from "react";
-import { FlatList, Modal, Text, TouchableOpacity, View } from "react-native";
-import { useTheme } from "../theme/index";
+/**
+ * Dropdown Component (TypeScript)
+ * Modal-based dropdown selector
+ */
 
-export default function Dropdown({
+import { Check, ChevronDown } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { FlatList, Modal, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { useTheme } from '../../theme';
+
+interface DropdownProps<T> {
+  label?: string;
+  placeholder?: string;
+  value: string;
+  onSelect: (value: string, item?: T) => void;
+  options: T[];
+  error?: string;
+  disabled?: boolean;
+  style?: ViewStyle;
+  renderItem?: (item: T, isSelected: boolean) => string;
+  keyExtractor?: (item: T) => string;
+}
+
+export default function Dropdown<T = any>({
   label,
-  placeholder = "Select an option",
+  placeholder = 'Select an option',
   value,
   onSelect,
   options = [],
@@ -14,40 +32,40 @@ export default function Dropdown({
   style = {},
   renderItem,
   keyExtractor,
-}) {
+}: DropdownProps<T>) {
   const theme = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
   const selectedOption = options.find((option) =>
-    keyExtractor ? keyExtractor(option) === value : option.value === value,
+    keyExtractor ? keyExtractor(option) === value : (option as any).value === value
   );
 
   const getSelectedText = () => {
     if (selectedOption) {
       return renderItem
         ? renderItem(selectedOption, true)
-        : selectedOption.label || selectedOption.name;
+        : (selectedOption as any).label || (selectedOption as any).name;
     }
     return placeholder;
   };
 
-  const handleSelect = (option) => {
-    const optionValue = keyExtractor ? keyExtractor(option) : option.value;
+  const handleSelect = (option: T) => {
+    const optionValue = keyExtractor ? keyExtractor(option) : (option as any).value;
     onSelect(optionValue, option);
     setIsOpen(false);
   };
 
-  const renderDropdownItem = ({ item }) => {
+  const renderDropdownItem = ({ item }: { item: T }) => {
     const isSelected = keyExtractor
       ? keyExtractor(item) === value
-      : item.value === value;
+      : (item as any).value === value;
 
     return (
       <TouchableOpacity
         style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           paddingVertical: 16,
           paddingHorizontal: 20,
           borderBottomWidth: 1,
@@ -58,14 +76,14 @@ export default function Dropdown({
         <Text
           style={{
             fontSize: 16,
-            fontFamily: "Quicksand-Regular",
+            fontFamily: 'Quicksand-Regular',
             color: isSelected
               ? theme.colors.primary
               : theme.colors.text.primary,
             flex: 1,
           }}
         >
-          {renderItem ? renderItem(item, false) : item.label || item.name}
+          {renderItem ? renderItem(item, false) : (item as any).label || (item as any).name}
         </Text>
         {isSelected && <Check size={20} color={theme.colors.primary} />}
       </TouchableOpacity>
@@ -78,7 +96,7 @@ export default function Dropdown({
         <Text
           style={{
             fontSize: 16,
-            fontFamily: "Quicksand-Medium",
+            fontFamily: 'Quicksand-Medium',
             color: theme.colors.text.primary,
             marginBottom: 8,
           }}
@@ -89,9 +107,9 @@ export default function Dropdown({
 
       <TouchableOpacity
         style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           backgroundColor: theme.colors.input.background,
           borderWidth: 1,
           borderColor: error ? theme.colors.error : theme.colors.input.border,
@@ -106,7 +124,7 @@ export default function Dropdown({
         <Text
           style={{
             fontSize: 16,
-            fontFamily: "Quicksand-Regular",
+            fontFamily: 'Quicksand-Regular',
             color: selectedOption
               ? theme.colors.text.primary
               : theme.colors.input.placeholder,
@@ -119,7 +137,7 @@ export default function Dropdown({
           size={20}
           color={theme.colors.text.tertiary}
           style={{
-            transform: [{ rotate: isOpen ? "180deg" : "0deg" }],
+            transform: [{ rotate: isOpen ? '180deg' : '0deg' }],
           }}
         />
       </TouchableOpacity>
@@ -128,7 +146,7 @@ export default function Dropdown({
         <Text
           style={{
             fontSize: 14,
-            fontFamily: "Quicksand-Regular",
+            fontFamily: 'Quicksand-Regular',
             color: theme.colors.error,
             marginTop: 4,
           }}
@@ -147,8 +165,8 @@ export default function Dropdown({
           style={{
             flex: 1,
             backgroundColor: theme.colors.overlay,
-            justifyContent: "center",
-            alignItems: "center",
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
           activeOpacity={1}
           onPress={() => setIsOpen(false)}
@@ -157,8 +175,8 @@ export default function Dropdown({
             style={{
               backgroundColor: theme.colors.surface,
               borderRadius: 16,
-              maxHeight: "60%",
-              width: "85%",
+              maxHeight: '60%',
+              width: '85%',
               maxWidth: 400,
             }}
           >
@@ -173,12 +191,12 @@ export default function Dropdown({
               <Text
                 style={{
                   fontSize: 18,
-                  fontFamily: "Quicksand-SemiBold",
+                  fontFamily: 'Quicksand-SemiBold',
                   color: theme.colors.text.primary,
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
-                {label || "Select Option"}
+                {label || 'Select Option'}
               </Text>
             </View>
 
@@ -188,7 +206,7 @@ export default function Dropdown({
               keyExtractor={(item, index) =>
                 keyExtractor
                   ? keyExtractor(item)
-                  : item.value || index.toString()
+                  : (item as any).value || index.toString()
               }
               showsVerticalScrollIndicator={false}
               style={{

@@ -1,6 +1,20 @@
-import React from "react";
-import { View, TouchableOpacity } from "react-native";
-import { useTheme } from "../theme/index";
+/**
+ * Card Component (TypeScript)
+ * Container card with optional press action
+ */
+
+import React from 'react';
+import { TouchableOpacity, View, ViewStyle } from 'react-native';
+import { useTheme } from '../../theme';
+
+interface CardProps {
+  children: React.ReactNode;
+  onPress?: () => void;
+  style?: ViewStyle;
+  padding?: number;
+  borderRadius?: number;
+  shadow?: boolean;
+}
 
 export default function Card({
   children,
@@ -9,11 +23,10 @@ export default function Card({
   padding = 16,
   borderRadius = 12,
   shadow = true,
-  ...props
-}) {
+}: CardProps) {
   const theme = useTheme();
 
-  const cardStyle = {
+  const cardStyle: ViewStyle = {
     backgroundColor: theme.colors.card.background,
     borderRadius,
     padding,
@@ -23,11 +36,13 @@ export default function Card({
   };
 
   if (shadow) {
-    cardStyle.shadowColor = theme.colors.shadow;
-    cardStyle.shadowOffset = { width: 0, height: 2 };
-    cardStyle.shadowOpacity = 0.1;
-    cardStyle.shadowRadius = 4;
-    cardStyle.elevation = 3;
+    Object.assign(cardStyle, {
+      shadowColor: theme.colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    });
   }
 
   if (onPress) {
@@ -36,16 +51,11 @@ export default function Card({
         style={cardStyle}
         onPress={onPress}
         activeOpacity={0.8}
-        {...props}
       >
         {children}
       </TouchableOpacity>
     );
   }
 
-  return (
-    <View style={cardStyle} {...props}>
-      {children}
-    </View>
-  );
+  return <View style={cardStyle}>{children}</View>;
 }

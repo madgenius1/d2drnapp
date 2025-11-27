@@ -1,50 +1,72 @@
-import React from "react";
-import { TouchableOpacity, Text, ActivityIndicator, View } from "react-native";
-import { useTheme } from "../theme/index";
+/**
+ * Button Component (TypeScript)
+ * Reusable button with variants and loading state
+ */
+
+import { LucideIcon } from 'lucide-react-native';
+import React from 'react';
+import { ActivityIndicator, Text, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
+import { useTheme } from '../../theme';
+
+type ButtonVariant = 'primary' | 'secondary' | 'outline';
+type ButtonSize = 'small' | 'medium' | 'large';
+
+interface ButtonProps {
+  title?: string;
+  onPress: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  leftIcon?: LucideIcon;
+  rightIcon?: LucideIcon;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+  fullWidth?: boolean;
+}
 
 export default function Button({
   title,
   onPress,
   disabled = false,
   loading = false,
-  variant = "primary", // primary, secondary, outline
-  size = "large", // small, medium, large
+  variant = 'primary',
+  size = 'large',
   leftIcon: LeftIcon,
   rightIcon: RightIcon,
   style = {},
   textStyle = {},
   fullWidth = true,
-  ...props
-}) {
+}: ButtonProps) {
   const theme = useTheme();
 
-  const getButtonStyle = () => {
-    const baseStyle = {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      borderRadius: size === "small" ? 8 : 12,
-      paddingHorizontal: size === "small" ? 12 : size === "medium" ? 16 : 20,
-      paddingVertical: size === "small" ? 8 : size === "medium" ? 12 : 16,
+  const getButtonStyle = (): ViewStyle => {
+    const baseStyle: ViewStyle = {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: size === 'small' ? 8 : 12,
+      paddingHorizontal: size === 'small' ? 12 : size === 'medium' ? 16 : 20,
+      paddingVertical: size === 'small' ? 8 : size === 'medium' ? 12 : 16,
       opacity: disabled || loading ? 0.6 : 1,
     };
 
     if (fullWidth) {
-      baseStyle.width = "100%";
+      baseStyle.width = '100%';
     }
 
     switch (variant) {
-      case "secondary":
+      case 'secondary':
         return {
           ...baseStyle,
           backgroundColor: theme.colors.elevated,
           borderWidth: 1,
           borderColor: theme.colors.border,
         };
-      case "outline":
+      case 'outline':
         return {
           ...baseStyle,
-          backgroundColor: "transparent",
+          backgroundColor: 'transparent',
           borderWidth: 2,
           borderColor: theme.colors.primary,
         };
@@ -56,20 +78,20 @@ export default function Button({
     }
   };
 
-  const getTextStyle = () => {
-    const baseTextStyle = {
-      fontFamily: "Quicksand-SemiBold",
-      fontSize: size === "small" ? 14 : size === "medium" ? 16 : 18,
-      fontWeight: "600",
+  const getTextStyle = (): TextStyle => {
+    const baseTextStyle: TextStyle = {
+      fontFamily: 'Quicksand-SemiBold',
+      fontSize: size === 'small' ? 14 : size === 'medium' ? 16 : 18,
+      fontWeight: '600',
     };
 
     switch (variant) {
-      case "secondary":
+      case 'secondary':
         return {
           ...baseTextStyle,
           color: theme.colors.text.primary,
         };
-      case "outline":
+      case 'outline':
         return {
           ...baseTextStyle,
           color: theme.colors.primary,
@@ -77,16 +99,16 @@ export default function Button({
       default: // primary
         return {
           ...baseTextStyle,
-          color: "#ffffff",
+          color: '#ffffff',
         };
     }
   };
 
-  const iconSize = size === "small" ? 16 : size === "medium" ? 18 : 20;
+  const iconSize = size === 'small' ? 16 : size === 'medium' ? 18 : 20;
   const iconColor =
-    variant === "primary"
-      ? "#ffffff"
-      : variant === "outline"
+    variant === 'primary'
+      ? '#ffffff'
+      : variant === 'outline'
         ? theme.colors.primary
         : theme.colors.text.primary;
 
@@ -96,7 +118,6 @@ export default function Button({
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.8}
-      {...props}
     >
       {loading ? (
         <ActivityIndicator size="small" color={iconColor} />
