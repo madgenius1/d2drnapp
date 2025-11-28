@@ -1,33 +1,28 @@
-/**
- * Home/Dashboard Screen (TypeScript)
- * Main dashboard with quick actions and stats
- */
-
-import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import {
-    CheckCircle2,
-    ClipboardList,
-    CreditCard,
-    FileText,
-    Heart,
-    LucideIcon,
-    Package,
-    Plus,
-    PlusCircle,
-    Search,
-    ShoppingCart,
-    UtensilsCrossed,
+  CheckCircle2,
+  ClipboardList,
+  CreditCard,
+  FileText,
+  Heart,
+  LucideIcon,
+  Package,
+  Plus,
+  PlusCircle,
+  Search,
+  ShoppingCart,
+  UtensilsCrossed,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';
 import { ERRAND_TEMPLATES } from '../../data/errandTemplates';
 import { useOrders } from '../../hooks/useOrders';
-import { useTheme } from '../../theme';
+import { useTheme } from "../../theme/index";
 
 interface ErrandTemplate {
   id: string;
@@ -36,25 +31,27 @@ interface ErrandTemplate {
   icon: string;
 }
 
-const getIconComponent = (iconName: string): LucideIcon => {
-  const icons: Record<string, LucideIcon> = {
-    ShoppingCart,
-    Package,
-    CreditCard,
-    Heart,
-    FileText,
-    UtensilsCrossed,
-  };
-  return icons[iconName] || Package;
-};
-
 export default function HomeScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  // const { errandTemplates } = useAppStore();
   const { getOrderStats } = useOrders();
   const [trackOrderId, setTrackOrderId] = useState('');
 
+
   const orderStats = getOrderStats();
+
+  const getIconComponent = (iconName: string): LucideIcon => {
+    const icons: Record<string, LucideIcon> = {
+      ShoppingCart,
+      Package,
+      CreditCard,
+      Heart,
+      FileText,
+      UtensilsCrossed,
+    };
+    return icons[iconName] || Package;
+  };
 
   const handleTrackOrder = () => {
     if (trackOrderId.trim()) {
@@ -76,7 +73,7 @@ export default function HomeScreen() {
         backgroundColor: theme.colors.background,
       }}
     >
-      <StatusBar style={theme.isDark ? 'light' : 'dark'} />
+      <StatusBar style={theme.isDark ? "light" : "dark"} />
 
       <ScrollView
         style={{ flex: 1 }}
@@ -96,10 +93,10 @@ export default function HomeScreen() {
           <Text
             style={{
               fontSize: 28,
-              fontFamily: 'Quicksand-Bold',
+              fontFamily: "Quicksand-Bold",
               color: theme.colors.text.primary,
               marginBottom: 4,
-              fontWeight: '700',
+              fontWeight: "700",
             }}
           >
             D2D Dashboard
@@ -107,7 +104,7 @@ export default function HomeScreen() {
           <Text
             style={{
               fontSize: 16,
-              fontFamily: 'Quicksand-Regular',
+              fontFamily: "Quicksand-Regular",
               color: theme.colors.text.secondary,
             }}
           >
@@ -118,7 +115,7 @@ export default function HomeScreen() {
         {/* Summary Cards */}
         <View
           style={{
-            flexDirection: 'row',
+            flexDirection: "row",
             paddingHorizontal: 20,
             marginBottom: 32,
             gap: 12,
@@ -127,9 +124,9 @@ export default function HomeScreen() {
           <Card
             style={{
               flex: 1,
-              alignItems: 'center',
-              backgroundColor: theme.colors.primary + '10',
-              borderColor: theme.colors.primary + '20',
+              alignItems: "center",
+              backgroundColor: theme.colors.primary + "10",
+              borderColor: theme.colors.primary + "20",
             }}
             padding={16}
           >
@@ -141,11 +138,11 @@ export default function HomeScreen() {
             <Text
               style={{
                 fontSize: 20,
-                fontFamily: 'Quicksand-Bold',
+                fontFamily: "Quicksand-Bold",
                 color: theme.colors.text.primary,
                 marginTop: 8,
                 marginBottom: 4,
-                fontWeight: '700',
+                fontWeight: "700",
               }}
             >
               {orderStats.created}
@@ -153,9 +150,9 @@ export default function HomeScreen() {
             <Text
               style={{
                 fontSize: 12,
-                fontFamily: 'Quicksand-Medium',
+                fontFamily: "Quicksand-Medium",
                 color: theme.colors.text.secondary,
-                textAlign: 'center',
+                textAlign: "center",
               }}
             >
               Created Orders
@@ -165,9 +162,9 @@ export default function HomeScreen() {
           <Card
             style={{
               flex: 1,
-              alignItems: 'center',
-              backgroundColor: theme.colors.pending + '10',
-              borderColor: theme.colors.pending + '20',
+              alignItems: "center",
+              backgroundColor: theme.colors.pending + "10",
+              borderColor: theme.colors.pending + "20",
             }}
             padding={16}
           >
@@ -179,11 +176,11 @@ export default function HomeScreen() {
             <Text
               style={{
                 fontSize: 20,
-                fontFamily: 'Quicksand-Bold',
+                fontFamily: "Quicksand-Bold",
                 color: theme.colors.text.primary,
                 marginTop: 8,
                 marginBottom: 4,
-                fontWeight: '700',
+                fontWeight: "700",
               }}
             >
               {orderStats.pending}
@@ -191,9 +188,9 @@ export default function HomeScreen() {
             <Text
               style={{
                 fontSize: 12,
-                fontFamily: 'Quicksand-Medium',
+                fontFamily: "Quicksand-Medium",
                 color: theme.colors.text.secondary,
-                textAlign: 'center',
+                textAlign: "center",
               }}
             >
               Pending Orders
@@ -203,9 +200,9 @@ export default function HomeScreen() {
           <Card
             style={{
               flex: 1,
-              alignItems: 'center',
-              backgroundColor: theme.colors.success + '10',
-              borderColor: theme.colors.success + '20',
+              alignItems: "center",
+              backgroundColor: theme.colors.success + "10",
+              borderColor: theme.colors.success + "20",
             }}
             padding={16}
           >
@@ -217,11 +214,11 @@ export default function HomeScreen() {
             <Text
               style={{
                 fontSize: 20,
-                fontFamily: 'Quicksand-Bold',
+                fontFamily: "Quicksand-Bold",
                 color: theme.colors.text.primary,
                 marginTop: 8,
                 marginBottom: 4,
-                fontWeight: '700',
+                fontWeight: "700",
               }}
             >
               {orderStats.completed}
@@ -229,9 +226,9 @@ export default function HomeScreen() {
             <Text
               style={{
                 fontSize: 12,
-                fontFamily: 'Quicksand-Medium',
+                fontFamily: "Quicksand-Medium",
                 color: theme.colors.text.secondary,
-                textAlign: 'center',
+                textAlign: "center",
               }}
             >
               Completed Orders
@@ -244,14 +241,14 @@ export default function HomeScreen() {
           <Button
             title="Create Order"
             leftIcon={Plus}
-            onPress={() => router.push('/order/create-order')}
+            onPress={() => router.push("/order/create-order")}
             style={{
               backgroundColor: theme.colors.primary,
               paddingVertical: 18,
             }}
             textStyle={{
               fontSize: 18,
-              fontFamily: 'Quicksand-SemiBold',
+              fontFamily: "Quicksand-SemiBold",
             }}
           />
         </View>
@@ -261,10 +258,10 @@ export default function HomeScreen() {
           <Text
             style={{
               fontSize: 18,
-              fontFamily: 'Quicksand-SemiBold',
+              fontFamily: "Quicksand-SemiBold",
               color: theme.colors.text.primary,
               marginBottom: 12,
-              fontWeight: '600',
+              fontWeight: "600",
             }}
           >
             Quick Track
@@ -296,10 +293,10 @@ export default function HomeScreen() {
           <Text
             style={{
               fontSize: 18,
-              fontFamily: 'Quicksand-SemiBold',
+              fontFamily: "Quicksand-SemiBold",
               color: theme.colors.text.primary,
               marginBottom: 16,
-              fontWeight: '600',
+              fontWeight: "600",
             }}
           >
             Quick Errands
@@ -307,8 +304,8 @@ export default function HomeScreen() {
 
           <View
             style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
+              flexDirection: "row",
+              flexWrap: "wrap",
               gap: 12,
             }}
           >

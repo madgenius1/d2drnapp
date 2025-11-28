@@ -1,6 +1,6 @@
 /**
- * Firebase initialization and configuration
- * Provides singleton instances of Firebase services
+ * Firebase Configuration
+ * Initialize Firebase services
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,9 +13,9 @@ import {
   getReactNativePersistence,
   initializeAuth
 } from 'firebase/auth';
-import { doc, Firestore, getDoc, getFirestore } from 'firebase/firestore';
-import { FirebaseStorage, getStorage } from 'firebase/storage';
-import { env, validateEnv } from '../../config/env';
+import { Firestore, getFirestore } from 'firebase/firestore';
+import { FirebaseStorage } from 'firebase/storage';
+import { validateEnv } from '../../config/env';
 
 // Validate environment variables
 const envValidation = validateEnv();
@@ -26,115 +26,56 @@ if (!envValidation.isValid && __DEV__) {
   );
 }
 
-// Firebase configuration object
+
+// Your Firebase configuration
 const firebaseConfig = {
-  apiKey: env.firebase.apiKey,
-  authDomain: env.firebase.authDomain,
-  projectId: env.firebase.projectId,
-  storageBucket: env.firebase.storageBucket,
-  messagingSenderId: env.firebase.messagingSenderId,
-  appId: env.firebase.appId,
-  measurementId: env.firebase.measurementId,
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || "YOUR_API_KEY",
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || "YOUR_AUTH_DOMAIN",
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || "YOUR_PROJECT_ID",
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || "YOUR_STORAGE_BUCKET",
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_SENDER_ID",
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "YOUR_APP_ID",
+  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || ""
 };
 
-// Initialize Firebase app (singleton pattern)
+// Initialize Firebase
 let app: FirebaseApp;
 let auth: Auth;
 let firestore: Firestore;
 let storage: FirebaseStorage;
 
-try {
-  // Check if Firebase app already exists
-  if (getApps().length === 0) {
-    app = initializeApp(firebaseConfig);
-    if (__DEV__) {
-      console.log('[Firebase] App initialized successfully');
-    }
-  } else {
-    app = getApp();
-    if (__DEV__) {
-      console.log('[Firebase] Using existing app instance');
-    }
-  }
-
-  // Initialize Firebase Auth with AsyncStorage persistence
-  try {
-    auth = initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage),
-    });
-  } catch (error: any) {
-    // Auth may already be initialized
-    if (error.code === 'auth/already-initialized') {
-      auth = getAuth(app);
-    } else {
-      throw error;
-    }
-  }
-
-  // Initialize Firestore
-  firestore = getFirestore(app);
-
-  // Initialize Storage
-  storage = getStorage(app);
-
-  if (__DEV__) {
-    console.log('[Firebase] All services initialized');
-  }
-} catch (error) {
-  console.error('[Firebase] Initialization error:', error);
-  throw new Error('Failed to initialize Firebase services');
+if (getApps().length === 0) {
+  app = initializeApp(firebaseConfig);
+  console.log('[Firebase] App initialized successfully');
+} else {
+  app = getApp();
+  console.log('[Firebase] Using existing Firebase app');
 }
 
-// Export Firebase instances
-export { app, auth, firestore, storage };
+// Initialize Auth with AsyncStorage persistence
+try {
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)
+  });
+  console.log('[Firebase] Auth initialized with persistence');
+} catch (error) {
+  // Auth might already be initialized
+  auth = getAuth(app);
+  console.log('[Firebase] Using existing Auth instance');
+}
 
-// Export Firebase app for re-initialization if needed
-export const getFirebaseApp = (): FirebaseApp => {
-  if (!app) {
-    throw new Error('Firebase app not initialized');
-  }
-  return app;
-};
+// Initialize Firestore
+const db = getFirestore(app);
+console.log('[Firebase] Firestore initialized');
 
-// Export auth instance
-export const getFirebaseAuth = (): Auth => {
-  if (!auth) {
-    throw new Error('Firebase Auth not initialized');
-  }
-  return auth;
-};
+// Initialize Storage (for future use - profile pictures, etc.)storage = getStorage(app);
+console.log('[Firebase] Storage initialized');
 
-// Export firestore instance
-export const getFirebaseFirestore = (): Firestore => {
-  if (!firestore) {
-    throw new Error('Firestore not initialized');
-  }
-  return firestore;
-};
+console.log('[Firebase] All services initialized');
 
-// Export storage instance
-export const getFirebaseStorage = (): FirebaseStorage => {
-  if (!storage) {
-    throw new Error('Firebase Storage not initialized');
-  }
-  return storage;
-};
+// Export initialized services
+export { app, auth, db, storage };
 
-// Health check function
-export const checkFirebaseConnection = async (): Promise<boolean> => {
-  try {
-    const testDocRef = doc(firestore, '_health', 'test');
-    await getDoc(testDocRef);
-    return true;
-  } catch (error) {
-    console.error('[Firebase] Connection check failed:', error);
-    return false;
-  }
-};
+// Export Firebase config for reference
+  export { firebaseConfig };
 
-export default {
-  app,
-  auth,
-  firestore,
-  storage,
-};

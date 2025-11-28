@@ -56,9 +56,16 @@ function RootLayoutNav() {
     const inTabsGroup = segments[0] === "(tabs)";
     const isOnboarding = segments[0] === "onboarding";
     const isSplash = segments[0] === "splash";
+    const isOrderScreen = segments[0] === "order";
 
-    // Allow splash and onboarding to show without interference
+    // Allow splash, onboarding, and order screens without interference
     if (isSplash || isOnboarding) {
+      setIsNavigationReady(true);
+      return;
+    }
+
+    // Allow order screens if authenticated
+    if (isOrderScreen && isAuthenticated) {
       setIsNavigationReady(true);
       return;
     }
@@ -71,9 +78,11 @@ function RootLayoutNav() {
      */
     if (!isAuthenticated && !inAuthGroup) {
       // User not authenticated, redirect to login
+      console.log('[RootLayout] Not authenticated, redirecting to login');
       router.replace("/(auth)/login");
     } else if (isAuthenticated && inAuthGroup) {
       // User is authenticated but on login/register screen, redirect to home
+      console.log('[RootLayout] Authenticated in auth group, redirecting to tabs');
       router.replace("/(tabs)");
     }
 
@@ -98,14 +107,13 @@ function RootLayoutNav() {
 
   return (
     <Stack screenOptions={{ headerShown: false }} initialRouteName="splash">
+      <Stack.Screen name="index" />
       <Stack.Screen name="splash" />
       <Stack.Screen name="onboarding" />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="order/create-order" />
-      <Stack.Screen name="order/order-details" />
-      <Stack.Screen name="order/track-order" />
-      <Stack.Screen name="order/modify-order" />
+      {/* Order folder - Expo Router handles nested routes automatically */}
+      <Stack.Screen name="order" />
     </Stack>
   );
 }

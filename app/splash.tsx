@@ -1,71 +1,79 @@
-/**
- * Splash Screen (TypeScript)
- * Initial loading screen with D2D branding
- */
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
-import { Animated, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '../hooks/useAuth';
-import { useTheme } from '../theme';
+import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Animated, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuthStore } from "../store/authStore";
+import { useAppStore } from "../store/index";
+import { useTheme } from "../theme/index";
 
 export default function SplashScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const [fadeAnim] = useState(new Animated.Value(0));
-  const { isAuthenticated, isLoading } = useAuth();
+
+  const { isAuthenticated, isInitialized } = useAuthStore();
+  const { isOnboardingComplete } = useAppStore();
 
   useEffect(() => {
+    console.log('[Splash] Mounting...');
+    
     // Fade in animation
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 1000,
       useNativeDriver: true,
     }).start();
+  }, []);
 
-    // Check onboarding status and navigate
-    const checkOnboardingAndNavigate = async () => {
-      try {
-        const onboardingComplete = await AsyncStorage.getItem('d2d-onboarding-complete');
+  useEffect(() => {
+    // Wait for auth to initialize before navigating
+    if (!isInitialized) {
+      console.log('[Splash] Waiting for auth initialization...');
+      return;
+    }
 
-        setTimeout(() => {
-          if (!onboardingComplete) {
-            router.replace('/onboarding');
-          } else if (!isAuthenticated && !isLoading) {
-            router.replace('/(auth)/login');
-          } else if (isAuthenticated) {
-            router.replace('/(tabs)');
-          }
-        }, 2000);
-      } catch (error) {
-        console.error('Splash navigation error:', error);
-        router.replace('/onboarding');
+    console.log('[Splash] Auth initialized. Status:', {
+      isAuthenticated,
+      isOnboardingComplete,
+    });
+
+    // Navigate after a short delay to show splash
+    const timer = setTimeout(() => {
+      console.log('[Splash] Navigating...');
+      
+      if (!isOnboardingComplete) {
+        console.log('[Splash] -> Onboarding');
+        router.replace("/onboarding");
+      } else if (!isAuthenticated) {
+        console.log('[Splash] -> Login');
+        router.replace("/(auth)/login");
+      } else {
+        console.log('[Splash] -> Tabs');
+        router.replace("/(tabs)");
       }
-    };
+    }, 2000);
 
-    checkOnboardingAndNavigate();
-  }, [fadeAnim, isAuthenticated, isLoading]);
+    return () => clearTimeout(timer);
+  }, [isInitialized, isAuthenticated, isOnboardingComplete]);
 
   return (
     <View
       style={{
         flex: 1,
         backgroundColor: theme.colors.background,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
       }}
     >
-      <StatusBar style={theme.isDark ? 'light' : 'dark'} />
+      <StatusBar style={theme.isDark ? "light" : "dark"} />
 
       <Animated.View
         style={{
           opacity: fadeAnim,
-          alignItems: 'center',
+          alignItems: "center",
         }}
       >
         {/* D2D Logo */}
@@ -75,8 +83,8 @@ export default function SplashScreen() {
             height: 100,
             borderRadius: 50,
             backgroundColor: theme.colors.primary,
-            justifyContent: 'center',
-            alignItems: 'center',
+            justifyContent: "center",
+            alignItems: "center",
             marginBottom: 24,
             shadowColor: theme.colors.shadow,
             shadowOffset: { width: 0, height: 4 },
@@ -88,9 +96,9 @@ export default function SplashScreen() {
           <Text
             style={{
               fontSize: 36,
-              fontFamily: 'Quicksand-Bold',
-              color: '#ffffff',
-              fontWeight: '700',
+              fontFamily: "Quicksand-Bold",
+              color: "#ffffff",
+              fontWeight: "700",
             }}
           >
             D2D
@@ -101,9 +109,9 @@ export default function SplashScreen() {
         <Text
           style={{
             fontSize: 20,
-            fontFamily: 'Quicksand-Medium',
+            fontFamily: "Quicksand-Medium",
             color: theme.colors.text.secondary,
-            textAlign: 'center',
+            textAlign: "center",
             letterSpacing: 0.5,
           }}
         >
@@ -114,13 +122,29 @@ export default function SplashScreen() {
         <Text
           style={{
             fontSize: 16,
-            fontFamily: 'Quicksand-Regular',
+            fontFamily: "Quicksand-Regular",
             color: theme.colors.text.tertiary,
-            textAlign: 'center',
+            textAlign: "center",
             marginTop: 8,
+            marginBottom: 32,
           }}
         >
           Your reliable delivery partner
+        </Text>
+
+        {/* Loading Indicator */}
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        
+        <Text
+          style={{
+            fontSize: 14,
+            fontFamily: "Quicksand-Regular",
+            color: theme.colors.text.tertiary,
+            textAlign: "center",
+            marginTop: 16,
+          }}
+        >
+          {!isInitialized ? "Initializing..." : "Loading..."}
         </Text>
       </Animated.View>
     </View>
