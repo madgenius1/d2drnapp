@@ -55,11 +55,10 @@ function RootLayoutNav() {
     const inAuthGroup = segments[0] === "(auth)";
     const inTabsGroup = segments[0] === "(tabs)";
     const isOnboarding = segments[0] === "onboarding";
-    const isSplash = segments[0] === "splash";
     const isOrderScreen = segments[0] === "order";
 
-    // Allow splash, onboarding, and order screens without interference
-    if (isSplash || isOnboarding) {
+    // Allow onboarding without interference
+    if (isOnboarding) {
       setIsNavigationReady(true);
       return;
     }
@@ -106,9 +105,8 @@ function RootLayoutNav() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }} initialRouteName="splash">
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
-      <Stack.Screen name="splash" />
       <Stack.Screen name="onboarding" />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
