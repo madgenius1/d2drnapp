@@ -1,476 +1,407 @@
 /**
- * Firestore Database Service
- * Handles all Firestore CRUD operations for orders and users
+ * Firestore Service
+ * Handles all Firestore database operations with proper error handling
  */
 
 import {
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    onSnapshot,
-    orderBy,
-    query,
-    QueryConstraint,
-    serverTimestamp,
-    setDoc,
-    Timestamp,
-    updateDoc,
-    where
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  Timestamp,
+  updateDoc,
+  where,
+  type Unsubscribe,
 } from 'firebase/firestore';
 import type {
-    CreateDeliveryOrderData,
-    CreateErrandOrderData,
-    DeliveryOrder,
-    ErrandOrder,
-    Order,
-    OrderFilters,
-    OrderResult,
-    OrdersResult,
-    UpdateOrderData,
-    User,
+  CreateDeliveryOrderData,
+  CreateErrandOrderData,
+  Order,
+  OrderFilters,
+  OrderResult,
+  UpdateOrderData,
 } from '../../types';
-import { firestore } from './config';
+import { db } from './config';
 
-// Collections
-const COLLECTIONS = {
-  USERS: 'users',
-  ORDERS: 'orders',
-  ROUTES: 'routes',
-} as const;
-
-/**
- * Generate unique order ID
- */
-const generateOrderId = (): string => {
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substring(2, 9);
-  return `D2D-${timestamp}-${random}`.toUpperCase();
-};
-
-/**
- * Convert Firestore timestamp to ISO string
- */
-const timestampToISO = (timestamp: any): string => {
-  if (timestamp instanceof Timestamp) {
-    return timestamp.toDate().toISOString();
+class FirestoreService {
+  /**
+   * Check if Firestore is initialized
+   */
+  private checkDb() {
+    if (!db) {
+      throw new Error('[Firestore] Database not initialized');
+    }
+    return db;
   }
-  if (timestamp?.toDate) {
-    return timestamp.toDate().toISOString();
+
+  /**
+   * Subscribe to user's orders (real-time updates)
+   */
+  subscribeToUserOrders(
+    userId: string,
+    callback: (orders: Order[]) => void,
+    filters?: OrderFilters
+  ): Unsubscribe {
+    try {
+      const firestore = this.checkDb();
+      const ordersRef = collection(firestore, 'orders');
+
+      // Build query
+      let q = query(
+        ordersRef,
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+
+      // Apply filters if provided
+      if (filters?.status) {
+        q = query(q, where('status', '==', filters.status));
+      }
+
+      // Subscribe to changes
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          const orders: Order[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate() || new Date(),
+            updatedAt: doc.data().updatedAt?.toDate(),
+          })) as Order[];
+
+          callback(orders);
+        },
+        (error) => {
+          console.error('[Firestore] Error in orders subscription:', error);
+          // Return empty array on error
+          callback([]);
+        }
+      );
+
+      return unsubscribe;
+    } catch (error) {
+      console.error('[Firestore] Error setting up subscription:', error);
+      // Return empty callback and no-op unsubscribe
+      callback([]);
+      return () => {};
+    }
   }
-  return new Date().toISOString();
-};
 
-/**
- * Create a new delivery order
- */
-export const createDeliveryOrder = async (
-  userId: string,
-  data: CreateDeliveryOrderData,
-  priceBreakdown: any
-): Promise<OrderResult> => {
-  try {
-    const orderId = generateOrderId();
-    const orderRef = doc(firestore, COLLECTIONS.ORDERS, orderId);
+  /**
+   * Subscribe to a single order
+   */
+  subscribeToOrder(
+    orderId: string,
+    callback: (order: Order | null) => void
+  ): Unsubscribe {
+    try {
+      const firestore = this.checkDb();
+      const orderRef = doc(firestore, 'orders', orderId);
 
-    const orderData: Omit<DeliveryOrder, 'id'> = {
-      userId,
-      type: 'delivery',
-      status: 'scheduled',
-      pickup: {
-        routeId: data.pickupRouteId,
-        routeName: '', // Will be filled by caller
-        stopId: data.pickupStopId,
-        stopName: '', // Will be filled by caller
-        fullAddress: '',
-      },
-      pickupDate: data.pickupDate,
-      pickupTime: data.pickupTime,
-      dropoff: {
-        routeId: data.dropoffRouteId,
-        routeName: '', // Will be filled by caller
-        stopId: data.dropoffStopId,
-        stopName: '', // Will be filled by caller
-        fullAddress: '',
-      },
-      recipient: {
-        name: data.recipientName,
-        phone: data.recipientPhone,
-      },
-      itemDescription: data.itemDescription,
-      isFragile: data.isFragile,
-      specialNotes: data.specialNotes || '',
-      paymentMethod: data.paymentMethod,
-      paymentStatus: data.paymentMethod === 'payNow' ? 'pending' : 'pending',
-      totalPrice: priceBreakdown.total,
-      priceBreakdown,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+      const unsubscribe = onSnapshot(
+        orderRef,
+        (snapshot) => {
+          if (snapshot.exists()) {
+            const order: Order = {
+              id: snapshot.id,
+              ...snapshot.data(),
+              createdAt: snapshot.data().createdAt?.toDate() || new Date(),
+              updatedAt: snapshot.data().updatedAt?.toDate(),
+            } as Order;
+            callback(order);
+          } else {
+            callback(null);
+          }
+        },
+        (error) => {
+          console.error('[Firestore] Error in order subscription:', error);
+          callback(null);
+        }
+      );
 
-    await setDoc(orderRef, {
-      ...orderData,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-
-    // Update user stats
-    await updateUserStats(userId, 'totalOrders', 1);
-    await updateUserStats(userId, 'pendingOrders', 1);
-
-    const order: DeliveryOrder = {
-      id: orderId,
-      ...orderData,
-    };
-
-    return {
-      success: true,
-      order,
-    };
-  } catch (error) {
-    console.error('[Firestore] Create delivery order error:', error);
-    return {
-      success: false,
-      error: 'Failed to create order. Please try again.',
-    };
+      return unsubscribe;
+    } catch (error) {
+      console.error('[Firestore] Error setting up order subscription:', error);
+      callback(null);
+      return () => {};
+    }
   }
-};
 
-/**
- * Create a new errand order
- */
-export const createErrandOrder = async (
-  userId: string,
-  data: CreateErrandOrderData,
-  priceBreakdown: any
-): Promise<OrderResult> => {
-  try {
-    const orderId = generateOrderId();
-    const orderRef = doc(firestore, COLLECTIONS.ORDERS, orderId);
+  /**
+   * Get all orders for a user
+   */
+  async getUserOrders(userId: string): Promise<Order[]> {
+    try {
+      const firestore = this.checkDb();
+      const ordersRef = collection(firestore, 'orders');
+      const q = query(
+        ordersRef,
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
 
-    const orderData: Omit<ErrandOrder, 'id'> = {
-      userId,
-      type: 'errand',
-      status: 'scheduled',
-      pickup: {
-        routeId: data.pickupRouteId,
-        routeName: '',
-        stopId: data.pickupStopId,
-        stopName: '',
-        fullAddress: '',
-      },
-      pickupDate: data.pickupDate,
-      pickupTime: data.pickupTime,
-      dropoff: {
-        routeId: data.dropoffRouteId,
-        routeName: '',
-        stopId: data.dropoffStopId,
-        stopName: '',
-        fullAddress: '',
-      },
-      recipient: {
-        name: data.recipientName,
-        phone: data.recipientPhone,
-      },
-      errandDescription: data.errandDescription,
-      estimatedBudget: data.estimatedBudget,
-      additionalNotes: data.additionalNotes,
-      isFragile: false,
-      paymentMethod: data.paymentMethod,
-      paymentStatus: 'pending',
-      totalPrice: priceBreakdown.total,
-      priceBreakdown,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+      const snapshot = await getDocs(q);
 
-    await setDoc(orderRef, {
-      ...orderData,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-
-    // Update user stats
-    await updateUserStats(userId, 'totalOrders', 1);
-    await updateUserStats(userId, 'pendingOrders', 1);
-
-    const order: ErrandOrder = {
-      id: orderId,
-      ...orderData,
-    };
-
-    return {
-      success: true,
-      order,
-    };
-  } catch (error) {
-    console.error('[Firestore] Create errand order error:', error);
-    return {
-      success: false,
-      error: 'Failed to create errand order. Please try again.',
-    };
+      return snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate() || new Date(),
+        updatedAt: doc.data().updatedAt?.toDate(),
+      })) as Order[];
+    } catch (error) {
+      console.error('[Firestore] Error fetching orders:', error);
+      return [];
+    }
   }
-};
 
-/**
- * Get single order by ID
- */
-export const getOrder = async (orderId: string): Promise<OrderResult> => {
-  try {
-    const orderRef = doc(firestore, COLLECTIONS.ORDERS, orderId);
-    const orderSnap = await getDoc(orderRef);
+  /**
+   * Get a single order
+   */
+  async getOrder(orderId: string): Promise<OrderResult> {
+    try {
+      const firestore = this.checkDb();
+      const orderRef = doc(firestore, 'orders', orderId);
+      const snapshot = await getDoc(orderRef);
 
-    if (!orderSnap.exists()) {
+      if (!snapshot.exists()) {
+        return {
+          success: false,
+          error: 'Order not found',
+        };
+      }
+
+      const order: Order = {
+        id: snapshot.id,
+        ...snapshot.data(),
+        createdAt: snapshot.data().createdAt?.toDate() || new Date(),
+        updatedAt: snapshot.data().updatedAt?.toDate(),
+      } as Order;
+
+      return {
+        success: true,
+        order,
+      };
+    } catch (error: any) {
+      console.error('[Firestore] Error fetching order:', error);
       return {
         success: false,
-        error: 'Order not found',
+        error: error.message || 'Failed to fetch order',
       };
     }
-
-    const data = orderSnap.data();
-    const order: Order = {
-      id: orderSnap.id,
-      ...data,
-      createdAt: timestampToISO(data.createdAt),
-      updatedAt: timestampToISO(data.updatedAt),
-      pickedAt: data.pickedAt ? timestampToISO(data.pickedAt) : undefined,
-      deliveredAt: data.deliveredAt ? timestampToISO(data.deliveredAt) : undefined,
-      completedAt: data.completedAt ? timestampToISO(data.completedAt) : undefined,
-      cancelledAt: data.cancelledAt ? timestampToISO(data.cancelledAt) : undefined,
-    } as Order;
-
-    return {
-      success: true,
-      order,
-    };
-  } catch (error) {
-    console.error('[Firestore] Get order error:', error);
-    return {
-      success: false,
-      error: 'Failed to fetch order',
-    };
   }
-};
 
-/**
- * Get all orders for a user with optional filters
- */
-export const getUserOrders = async (
-  userId: string,
-  filters?: OrderFilters
-): Promise<OrdersResult> => {
-  try {
-    const ordersRef = collection(firestore, COLLECTIONS.ORDERS);
-    const constraints: QueryConstraint[] = [where('userId', '==', userId)];
+  /**
+   * Create delivery order
+   */
+  async createDeliveryOrder(
+    userId: string,
+    data: CreateDeliveryOrderData,
+    priceBreakdown: any
+  ): Promise<OrderResult> {
+    try {
+      const firestore = this.checkDb();
+      const ordersRef = collection(firestore, 'orders');
 
-    // Apply filters
-    if (filters?.status && filters.status.length > 0) {
-      constraints.push(where('status', 'in', filters.status));
-    }
+      const orderData = {
+        userId,
+        type: 'delivery' as const,
+        status: 'scheduled' as const,
+        pickup: {
+          routeId: data.pickupRouteId,
+          stopId: data.pickupStopId,
+          routeName: '',
+          stopName: '',
+          fullAddress: '',
+          date: data.pickupDate,
+          time: data.pickupTime,
+        },
+        dropoff: {
+          routeId: data.dropoffRouteId,
+          stopId: data.dropoffStopId,
+          routeName: '',
+          stopName: '',
+          fullAddress: '',
+        },
+        recipient: {
+          name: data.recipientName,
+          phone: data.recipientPhone,
+        },
+        payment: {
+          method: data.paymentMethod,
+          status: data.paymentMethod === 'payNow' ? 'pending' : 'unpaid',
+          amount: priceBreakdown.total,
+        },
+        pricing: priceBreakdown,
+        // Optional fields with safe access
+        itemDescription: (data as any).itemDescription || (data as any).itemDetails || '',
+        isFragile: (data as any).isFragile || false,
+        specialInstructions: (data as any).additionalNotes || (data as any).specialInstructions || '',
+        // Required fields from type
+        pickupDate: data.pickupDate,
+        pickupTime: data.pickupTime,
+        paymentMethod: data.paymentMethod,
+        paymentStatus: data.paymentMethod === 'payNow' ? 'pending' : 'unpaid',
+        totalAmount: priceBreakdown.total,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      };
 
-    if (filters?.type && filters.type.length > 0) {
-      constraints.push(where('type', 'in', filters.type));
-    }
+      const docRef = await addDoc(ordersRef, orderData);
 
-    // Order by creation date (newest first)
-    constraints.push(orderBy('createdAt', 'desc'));
+      console.log('[Firestore] Delivery order created:', docRef.id);
 
-    const q = query(ordersRef, ...constraints);
-    const querySnapshot = await getDocs(q);
-
-    const orders: Order[] = querySnapshot.docs.map((doc) => {
-      const data = doc.data();
       return {
-        id: doc.id,
-        ...data,
-        createdAt: timestampToISO(data.createdAt),
-        updatedAt: timestampToISO(data.updatedAt),
-        pickedAt: data.pickedAt ? timestampToISO(data.pickedAt) : undefined,
-        deliveredAt: data.deliveredAt ? timestampToISO(data.deliveredAt) : undefined,
-        completedAt: data.completedAt ? timestampToISO(data.completedAt) : undefined,
-        cancelledAt: data.cancelledAt ? timestampToISO(data.cancelledAt) : undefined,
-      } as Order;
-    });
-
-    return {
-      success: true,
-      orders,
-    };
-  } catch (error) {
-    console.error('[Firestore] Get user orders error:', error);
-    return {
-      success: false,
-      error: 'Failed to fetch orders',
-      orders: [],
-    };
-  }
-};
-
-/**
- * Update order
- */
-export const updateOrder = async (
-  orderId: string,
-  updates: UpdateOrderData
-): Promise<OrderResult> => {
-  try {
-    const orderRef = doc(firestore, COLLECTIONS.ORDERS, orderId);
-
-    const updateData: any = {
-      ...updates,
-      updatedAt: serverTimestamp(),
-    };
-
-    // Add status-specific timestamps
-    if (updates.status === 'picked') {
-      updateData.pickedAt = serverTimestamp();
-    } else if (updates.status === 'dropped') {
-      updateData.deliveredAt = serverTimestamp();
-    } else if (updates.status === 'completed') {
-      updateData.completedAt = serverTimestamp();
-    } else if (updates.status === 'cancelled') {
-      updateData.cancelledAt = serverTimestamp();
+        success: true,
+        order: {
+          id: docRef.id,
+          ...orderData,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        } as unknown as Order,
+      };
+    } catch (error: any) {
+      console.error('[Firestore] Error creating delivery order:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to create order',
+      };
     }
-
-    await updateDoc(orderRef, updateData);
-
-    // Fetch updated order
-    return await getOrder(orderId);
-  } catch (error) {
-    console.error('[Firestore] Update order error:', error);
-    return {
-      success: false,
-      error: 'Failed to update order',
-    };
   }
-};
 
-/**
- * Delete order (soft delete by marking as cancelled)
- */
-export const deleteOrder = async (orderId: string): Promise<OrderResult> => {
-  try {
-    return await updateOrder(orderId, { status: 'cancelled' });
-  } catch (error) {
-    console.error('[Firestore] Delete order error:', error);
-    return {
-      success: false,
-      error: 'Failed to delete order',
-    };
-  }
-};
+  /**
+   * Create errand order
+   */
+  async createErrandOrder(
+    userId: string,
+    data: CreateErrandOrderData,
+    priceBreakdown: any
+  ): Promise<OrderResult> {
+    try {
+      const firestore = this.checkDb();
+      const ordersRef = collection(firestore, 'orders');
 
-/**
- * Subscribe to order changes (real-time)
- */
-export const subscribeToOrder = (
-  orderId: string,
-  callback: (order: Order | null) => void
-): (() => void) => {
-  const orderRef = doc(firestore, COLLECTIONS.ORDERS, orderId);
+      const orderData = {
+        userId,
+        type: 'errand' as const,
+        status: 'scheduled' as const,
+        pickup: {
+          routeId: data.pickupRouteId,
+          stopId: data.pickupStopId,
+          routeName: '',
+          stopName: '',
+          fullAddress: '',
+          date: data.pickupDate,
+          time: data.pickupTime,
+        },
+        dropoff: {
+          routeId: data.dropoffRouteId,
+          stopId: data.dropoffStopId,
+          routeName: '',
+          stopName: '',
+          fullAddress: '',
+        },
+        recipient: {
+          name: data.recipientName,
+          phone: data.recipientPhone,
+        },
+        payment: {
+          method: data.paymentMethod,
+          status: data.paymentMethod === 'payNow' ? 'pending' : 'unpaid',
+          amount: priceBreakdown.total,
+        },
+        pricing: priceBreakdown,
+        errandDescription: data.errandDescription,
+        estimatedBudget: data.estimatedBudget,
+        specialInstructions: data.additionalNotes || '',
+        // Required fields from type
+        pickupDate: data.pickupDate,
+        pickupTime: data.pickupTime,
+        paymentMethod: data.paymentMethod,
+        paymentStatus: data.paymentMethod === 'payNow' ? 'pending' : 'unpaid',
+        totalAmount: priceBreakdown.total,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      };
 
-  return onSnapshot(
-    orderRef,
-    (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        const order: Order = {
-          id: snapshot.id,
-          ...data,
-          createdAt: timestampToISO(data.createdAt),
-          updatedAt: timestampToISO(data.updatedAt),
-          pickedAt: data.pickedAt ? timestampToISO(data.pickedAt) : undefined,
-          deliveredAt: data.deliveredAt ? timestampToISO(data.deliveredAt) : undefined,
-          completedAt: data.completedAt ? timestampToISO(data.completedAt) : undefined,
-        } as Order;
-        callback(order);
-      } else {
-        callback(null);
-      }
-    },
-    (error) => {
-      console.error('[Firestore] Subscribe to order error:', error);
-      callback(null);
+      const docRef = await addDoc(ordersRef, orderData);
+
+      console.log('[Firestore] Errand order created:', docRef.id);
+
+      return {
+        success: true,
+        order: {
+          id: docRef.id,
+          ...orderData,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        } as unknown as Order,
+      };
+    } catch (error: any) {
+      console.error('[Firestore] Error creating errand order:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to create errand order',
+      };
     }
-  );
-};
-
-/**
- * Subscribe to user orders (real-time)
- */
-export const subscribeToUserOrders = (
-  userId: string,
-  callback: (orders: Order[]) => void,
-  filters?: OrderFilters
-): (() => void) => {
-  const ordersRef = collection(firestore, COLLECTIONS.ORDERS);
-  const constraints: QueryConstraint[] = [where('userId', '==', userId)];
-
-  if (filters?.status && filters.status.length > 0) {
-    constraints.push(where('status', 'in', filters.status));
   }
 
-  constraints.push(orderBy('createdAt', 'desc'));
+  /**
+   * Update order
+   */
+  async updateOrder(
+    orderId: string,
+    updates: UpdateOrderData
+  ): Promise<OrderResult> {
+    try {
+      const firestore = this.checkDb();
+      const orderRef = doc(firestore, 'orders', orderId);
 
-  const q = query(ordersRef, ...constraints);
-
-  return onSnapshot(
-    q,
-    (snapshot) => {
-      const orders: Order[] = snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          createdAt: timestampToISO(data.createdAt),
-          updatedAt: timestampToISO(data.updatedAt),
-          pickedAt: data.pickedAt ? timestampToISO(data.pickedAt) : undefined,
-          deliveredAt: data.deliveredAt ? timestampToISO(data.deliveredAt) : undefined,
-          completedAt: data.completedAt ? timestampToISO(data.completedAt) : undefined,
-        } as Order;
+      await updateDoc(orderRef, {
+        ...updates,
+        updatedAt: Timestamp.now(),
       });
-      callback(orders);
-    },
-    (error) => {
-      console.error('[Firestore] Subscribe to user orders error:', error);
-      callback([]);
+
+      console.log('[Firestore] Order updated:', orderId);
+
+      // Fetch updated order
+      return await this.getOrder(orderId);
+    } catch (error: any) {
+      console.error('[Firestore] Error updating order:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to update order',
+      };
     }
-  );
-};
-
-/**
- * Update user statistics
- */
-const updateUserStats = async (
-  userId: string,
-  field: keyof User['stats'],
-  increment: number
-): Promise<void> => {
-  try {
-    const userRef = doc(firestore, COLLECTIONS.USERS, userId);
-    const userSnap = await getDoc(userRef);
-
-    if (userSnap.exists()) {
-      const currentStats = userSnap.data().stats || {};
-      const newValue = (currentStats[field] || 0) + increment;
-
-      await updateDoc(userRef, {
-        [`stats.${field}`]: newValue,
-        updatedAt: serverTimestamp(),
-      });
-    }
-  } catch (error) {
-    console.error('[Firestore] Update user stats error:', error);
   }
-};
 
-export default {
-  createDeliveryOrder,
-  createErrandOrder,
-  getOrder,
-  getUserOrders,
-  updateOrder,
-  deleteOrder,
-  subscribeToOrder,
-  subscribeToUserOrders,
-};
+  /**
+   * Delete order
+   */
+  async deleteOrder(orderId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const firestore = this.checkDb();
+      const orderRef = doc(firestore, 'orders', orderId);
+
+      await deleteDoc(orderRef);
+
+      console.log('[Firestore] Order deleted:', orderId);
+
+      return { success: true };
+    } catch (error: any) {
+      console.error('[Firestore] Error deleting order:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to delete order',
+      };
+    }
+  }
+}
+
+// Export singleton instance
+const firestoreService = new FirestoreService();
+export default firestoreService;

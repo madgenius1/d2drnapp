@@ -10,11 +10,11 @@ import firestoreService from '../services/firebase/firestore.service';
 import { useAuthStore } from '../store/authStore';
 import { useOrderStore } from '../store/orderStore';
 import type {
-    CreateDeliveryOrderData,
-    CreateErrandOrderData,
-    Order,
-    OrderResult,
-    UpdateOrderData
+  CreateDeliveryOrderData,
+  CreateErrandOrderData,
+  Order,
+  OrderResult,
+  UpdateOrderData
 } from '../types';
 
 export const useOrders = () => {
@@ -48,16 +48,35 @@ export const useOrders = () => {
 
     setLoading(true);
 
-    const unsubscribe = firestoreService.subscribeToUserOrders(
-      user.id,
-      (orders) => {
-        setOrders(orders);
-        setLoading(false);
-      },
-      filters
-    );
+    // Add error handling for Firestore subscription
+    let unsubscribe: (() => void) | undefined;
 
-    return () => unsubscribe();
+    try {
+      unsubscribe = firestoreService.subscribeToUserOrders(
+        user.id,
+        (orders) => {
+          setOrders(orders);
+          setLoading(false);
+        },
+        filters
+      );
+    } catch (error) {
+      console.error('[useOrders] Error subscribing to orders:', error);
+      // Set empty orders and stop loading on error
+      setOrders([]);
+      setLoading(false);
+      // Don't set error state - just fail silently for now
+    }
+
+    return () => {
+      if (unsubscribe) {
+        try {
+          unsubscribe();
+        } catch (error) {
+          console.warn('[useOrders] Error unsubscribing:', error);
+        }
+      }
+    };
   }, [user?.id, filters]);
 
   /**
