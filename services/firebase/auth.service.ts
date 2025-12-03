@@ -4,28 +4,28 @@
  */
 
 import {
-    createUserWithEmailAndPassword,
-    User as FirebaseAuthUser,
-    signOut as firebaseSignOut,
-    updateProfile as firebaseUpdateProfile,
-    onAuthStateChanged,
-    sendPasswordResetEmail,
-    signInWithEmailAndPassword,
-    UserCredential,
+  createUserWithEmailAndPassword,
+  User as FirebaseAuthUser,
+  signOut as firebaseSignOut,
+  updateProfile as firebaseUpdateProfile,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  UserCredential,
 } from 'firebase/auth';
 import {
-    doc,
-    getDoc,
-    serverTimestamp,
-    setDoc,
-    updateDoc,
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
 } from 'firebase/firestore';
 import type {
-    AuthCredentials,
-    AuthResult,
-    RegisterData,
-    UpdateProfileData,
-    User
+  AuthCredentials,
+  AuthResult,
+  RegisterData,
+  UpdateProfileData,
+  User
 } from '../../types';
 import { auth, firestore } from './config';
 

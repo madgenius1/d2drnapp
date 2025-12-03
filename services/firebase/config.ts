@@ -77,5 +77,6 @@ console.log('[Firebase] All services initialized');
 export { app, auth, db, storage };
 
 // Export Firebase config for reference
-  export { firebaseConfig };
+  // Export Firebase config for reference
+  export { firebaseConfig, firestore };
 
