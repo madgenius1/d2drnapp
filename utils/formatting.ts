@@ -8,45 +8,85 @@ import { format, formatDistance, isToday, isYesterday } from 'date-fns';
 /**
  * Format currency (Kenyan Shillings)
  */
-export const formatCurrency = (amount: number): string => {
-  return `KES ${amount.toLocaleString('en-KE', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  })}`;
+export const formatCurrency = (amount: number | undefined | null): string => {
+  // Handle undefined, null, or invalid values
+  if (amount === undefined || amount === null || isNaN(amount)) {
+    return 'KES 0';
+  }
+
+  try {
+    return `KES ${amount.toLocaleString('en-KE', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })}`;
+  } catch (error) {
+    console.warn('[formatCurrency] Error formatting:', error);
+    return `KES ${amount}`;
+  }
 };
 
 /**
  * Format phone number (Kenyan format)
  * Converts to: +254 712 345 678
  */
-export const formatPhoneNumber = (phone: string): string => {
-  // Remove all non-numeric characters
+export const formatPhoneNumber = (phone: string | undefined | null): string => {
+  if (!phone) return '';
+
+  // Remove all non-digit characters
   const cleaned = phone.replace(/\D/g, '');
 
-  // Convert to international format
-  let formatted = cleaned;
-  if (cleaned.startsWith('0')) {
-    formatted = '254' + cleaned.substring(1);
-  } else if (!cleaned.startsWith('254')) {
-    formatted = '254' + cleaned;
+  // Format as +254 XXX XXX XXX
+  if (cleaned.startsWith('254') && cleaned.length === 12) {
+    return `+${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6, 9)} ${cleaned.slice(9)}`;
   }
 
-  // Add spacing: +254 712 345 678
-  if (formatted.length === 12) {
-    return `+${formatted.substring(0, 3)} ${formatted.substring(3, 6)} ${formatted.substring(6, 9)} ${formatted.substring(9)}`;
+  // Format as 07XX XXX XXX
+  if (cleaned.startsWith('0') && cleaned.length === 10) {
+    return `${cleaned.slice(0, 4)} ${cleaned.slice(4, 7)} ${cleaned.slice(7)}`;
   }
 
-  return phone; // Return original if format doesn't match
+  return phone;
 };
 
 /**
  * Format date (e.g., "Jan 15, 2024")
  */
-export const formatDate = (dateString: string): string => {
+export const formatDate = (
+  date: Date | string | undefined | null,
+  format: 'short' | 'long' | 'time' = 'short'
+): string => {
+  if (!date) return 'N/A';
+
   try {
-    return format(new Date(dateString), 'MMM dd, yyyy');
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    if (isNaN(dateObj.getTime())) {
+      return 'Invalid Date';
+    }
+
+    switch (format) {
+      case 'long':
+        return dateObj.toLocaleDateString('en-KE', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+      case 'time':
+        return dateObj.toLocaleTimeString('en-KE', {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+      default:
+        return dateObj.toLocaleDateString('en-KE', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
+    }
   } catch (error) {
-    return dateString;
+    console.warn('[formatDate] Error formatting:', error);
+    return 'Invalid Date';
   }
 };
 
@@ -206,8 +246,68 @@ export const parseDate = (dateString: string): Date | null => {
   }
 };
 
+/**
+ * Format order status
+ */
+export const formatOrderStatus = (status: string): string => {
+  const statusMap: Record<string, string> = {
+    scheduled: 'Scheduled',
+    picked: 'Picked Up',
+    onTheWay: 'On The Way',
+    dropped: 'Dropped Off',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+  };
+
+  return statusMap[status] || status;
+};
+
+/**
+ * Format time ago (e.g., "2 hours ago")
+ */
+export const formatTimeAgo = (date: Date | string | undefined | null): string => {
+  if (!date) return '';
+
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    if (isNaN(dateObj.getTime())) {
+      return '';
+    }
+
+    const now = new Date();
+    const diffMs = now.getTime() - dateObj.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+
+    return formatDate(dateObj, 'short');
+  } catch (error) {
+    console.warn('[formatTimeAgo] Error formatting:', error);
+    return '';
+  }
+};
+
+/**
+ * Parse amount from string
+ */
+export const parseAmount = (value: string): number => {
+  const cleaned = value.replace(/[^0-9.]/g, '');
+  const parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? 0 : parsed;
+};
+
+
 export default {
   formatCurrency,
+  parseAmount,
+  formatOrderStatus,
+  formatTimeAgo,
   formatPhoneNumber,
   formatDate,
   formatDateTime,
