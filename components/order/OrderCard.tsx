@@ -20,6 +20,21 @@ export default function OrderCard({ order, onPress }: OrderCardProps) {
   const theme = useTheme();
   const statusConfig = ORDER_STATUS_CONFIG[order.status];
 
+  // Safely get the price - check multiple possible locations
+  const getOrderPrice = () => {
+    const orderAny = order as any;
+    
+    // Check all possible price field names
+    if (orderAny.totalAmount) return orderAny.totalAmount;
+    if (orderAny.payment?.amount) return orderAny.payment.amount;
+    if (orderAny.pricing?.total) return orderAny.pricing.total;
+    if (orderAny.totalPrice) return orderAny.totalPrice;
+    
+    return 0;
+  };
+
+  const orderPrice = getOrderPrice();
+
   return (
     <TouchableOpacity
       style={[
@@ -84,7 +99,7 @@ export default function OrderCard({ order, onPress }: OrderCardProps) {
             ]}
             numberOfLines={1}
           >
-            {order.pickup.fullAddress}
+            {order.pickup?.fullAddress || 'Pickup location'}
           </Text>
         </View>
 
@@ -111,7 +126,7 @@ export default function OrderCard({ order, onPress }: OrderCardProps) {
             ]}
             numberOfLines={1}
           >
-            {order.dropoff.fullAddress}
+            {order.dropoff?.fullAddress || 'Dropoff location'}
           </Text>
         </View>
       </View>
@@ -146,7 +161,7 @@ export default function OrderCard({ order, onPress }: OrderCardProps) {
             },
           ]}
         >
-          {formatCurrency(order.totalPrice)}
+          {formatCurrency(orderPrice)}
         </Text>
       </View>
 

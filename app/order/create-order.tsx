@@ -216,11 +216,21 @@ export default function CreateOrderScreen() {
         [
           {
             text: 'View Order',
-            onPress: () => router.replace(`/order/order-details?id=${result.order!.id}`),
+            onPress: () => {
+              // Small delay to ensure navigation is ready
+              setTimeout(() => {
+                router.replace(`/order/order-details?id=${result.order!.id}`);
+              }, 100);
+            },
           },
           {
-            text: 'OK',
-            onPress: () => router.back(),
+            text: 'Back to Home',
+            onPress: () => {
+              setTimeout(() => {
+                router.replace('/(tabs)');
+              }, 100);
+            },
+            style: 'cancel',
           },
         ]
       );
